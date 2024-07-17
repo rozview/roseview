@@ -1,0 +1,23 @@
+{
+  "name": "roseview",
+  "version": "0.0.1",
+  "description": "The Framework You Build Interfaces Without Hassle >3",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oarabiledev/roseview.git"
+  },
+  "keywords": [
+    "ui",
+    "framework"
+  ],
+  "author": "Oarabile Koore",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/oarabiledev/roseview/issues"
+  },
+  "homepage": "https://github.com/oarabiledev/roseview#readme"
+}
