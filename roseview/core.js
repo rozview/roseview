@@ -230,7 +230,7 @@ const rsvHTMLELEMENT = class extends roseComponent {
 
 		this.element = document.createElement(element);
 
-		parent ? parent.addChild(this) : null;
+		parent ? parent.AddChild(this) : null;
 		options ? optionsApi(this.element, options) : null;
 
 		width ? (this.element.style.width = width) : null;
