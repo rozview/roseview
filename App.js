@@ -7,6 +7,12 @@ roseConfig.Title = "roseView Framework";
 export function OnStart() {
 	let lay = rsv.CreateLayout("linear", "center");
 
-	let btn = rsv.AddHtmlEl(lay, TonalButton, "Hello World 👋");
+	let btn = rsv.AddHtmlEl(lay, TonalButton);
+
+	btn.props("Hello World", "200px", "auto");
+
+	/* How To Access DOM API
+	btn.element.textContent = "Some Change";
+	*/
 	rsv.AddLayout(lay);
 }

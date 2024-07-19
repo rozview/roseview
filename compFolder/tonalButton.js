@@ -3,10 +3,9 @@ import { rsv, roseComponent } from "../roseview/core.js";
 /** CSS Code Made By ChatGPT */
 
 const TonalButton = class extends roseComponent {
-	constructor(parent, text, width = -1, height = -1) {
+	constructor(parent) {
 		super();
 		this.element = rsv.AddHtmlEl(parent, "button");
-		this.element.textContent = text;
 
 		this.element.css`
         border: 2px solid #6200ea; /* Material design purple */
@@ -32,10 +31,12 @@ const TonalButton = class extends roseComponent {
         `;
 
 		this.El = this.element.style;
-
+	}
+	/* Set props Method Into Your Custom Ui */
+	props(textContent, width, height) {
+		textContent ? (this.element.textContent = textContent) : null;
 		width ? (this.El.width = width) : "fit-content";
 		height ? (this.El.height = height) : "fit-content";
-		return this.element;
 	}
 };
 
