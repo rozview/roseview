@@ -9,7 +9,7 @@ To get started create a DroidScript Html App (roseview Engine is DroidScript nat
 The next step is to add the roseview.core.js file as a script tag :
 
 ```html
-<script src="https://unpkg.com/roseview@0.0.3/"></script>
+<script src="https://unpkg.com/browse/roseview@0.0.3/roseview.core.js"></script>
 ```
 
 The final step is to add the script tag where your main code will be located and get started.
