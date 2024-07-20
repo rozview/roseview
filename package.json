@@ -1,7 +1,8 @@
 {
 	"name": "roseview",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"description": "Migrate Your DroidScript Native Code To The Web <3",
+	"main": "roseview.core.js",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/oarabiledev/roseview.git"

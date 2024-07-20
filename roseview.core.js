@@ -11,6 +11,19 @@
 const DW = window.innerWidth;
 const DH = window.innerHeight;
 
+const $Q = (a) => document.querySelector(a);
+
+const $STL = document.getElementById("main");
+
+let animatelib = document.createElement("link");
+animatelib.href = "./animate.min.css";
+animatelib.rel = "text/stylesheey";
+
+let tweenlib = document.createElement("script");
+tweenlib.src = "./tween.min.js";
+$Q(head).appendChild(animatelib);
+$Q(head).appendChild(tweenlib);
+
 const cfg = {
 	get Landscape() {
 		lockOrientation("landscape");
@@ -39,10 +52,6 @@ const T = (text, langId) => {
 	 * Translation Function
 	 */
 };
-
-const $Q = (a) => document.querySelector(a);
-
-const $STL = document.getElementById("main");
 
 const $UId = () => {
 	const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
