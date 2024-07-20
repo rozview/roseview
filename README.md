@@ -1,30 +1,53 @@
 # roseview Engine
 
-roseView Engine is the web version of DroidScript Native Engine
+roseView Engine is a framework that allows you to write ui declarativley.
 
-It allows you to write DroidScript native code and build apps, just change the app call to rsv.
+roseview Engine borrows concepts from Android development and mixes them with the power of web development concepts like css.
 
-To get started create a DroidScript Html App (roseview Engine is DroidScript native code but instead of using the app object you reference the rsv object)
-
-The next step is to add the roseview.core.js file as a script tag :
+To get started import `rsv` object from the roseview.core.js
+The next step is to create this html file :
 
 ```html
-<script src="https://unpkg.com/browse/roseview@0.0.3/roseview.core.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <style>
+   html,
+   body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+   }
+  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+ <body>
+  <script type="module">
+   import { OnStart } from "./main.js";
+
+   document.addEventListener("DOMContentLoaded", () => {
+    OnStart();
+   });
+  </script>
+ </body>
+</html>
+
 ```
 
-The final step is to add the script tag where your main code will be located and get started.
-
-roseview is not different from DroidScript native so you literally do not have to learn anything new, just replace what you would call as app to rsv.
-
-i.e:
+In your main.js file :
 
 ```javascript
-function OnStart() {
- lay = rsv.CreateLayout("linear", "center");
- lay.SetBackColor("white");
+import { rsv, $Q, roseConfig } from "./roseviewsdk/roseview.core.js";
 
- rsv.AddLayout(lay);
+import { annotate } from "https://unpkg.com/rough-notation?module";
+
+export function OnStart() {
+ let layout = rsv.CreateLayout("linear", "top,vertical");
+
+ rsv.AddLayout(layout);
 }
 ```
 
-roseview Engine is in beta so most things available in DroidScript will not be available, you can contribute to the project though : ).
+I havent added more docs, the main.js file is the best to view roseview.js concepts.

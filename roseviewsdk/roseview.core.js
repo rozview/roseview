@@ -42,8 +42,24 @@ const roseConfig = {
 		lockOrientation("portrait");
 	},
 
+	/**
+	 * Sets Document Title
+	 */
 	set Title(title) {
 		document.title = title;
+	},
+
+	/**
+	 * Sets the global css great for media queries
+	 * @param {*} strings
+	 * @param  {...any} values
+	 */
+	globalStyle(strings, ...values) {
+		let cssString = strings.reduce((result, str, i) => {
+			return result + str + (values[i] || "");
+		}, "");
+
+		$Stl.innerHTML += cssString;
 	}
 };
 
@@ -73,6 +89,7 @@ const css = (strings, ...values) => {
 
 const roseComponent = class {
 	constructor() {
+		this.mounted = false;
 		this.element = null;
 		this.elementUid = null;
 		this.elementProps = {
@@ -205,6 +222,13 @@ const roseComponent = class {
 		return Boolean(this.elementProps.IsAlive);
 	}
 
+	SetSize(width, height) {
+		this.css`
+		width: ${width};
+		height: ${height};
+		`;
+	}
+
 	SetMargins(left, top, right, bottom) {
 		this.css`
 		margin-left: ${left};
@@ -212,6 +236,19 @@ const roseComponent = class {
 		margin-right: ${right};
 		margin-bottom: ${bottom};
 		`;
+	}
+
+	SetChildMargins(left, top, right, bottom) {
+		let cssString = css`
+			margin-left: ${left};
+			margin-top: ${top};
+			margin-right: ${right};
+			margin-bottom: ${bottom};
+		`;
+		let classname = $UId();
+		let classSTYLE = `.${classname} * { ${cssString} }`;
+		$Stl.innerHTML += classSTYLE;
+		this.element.classList.add(classname);
 	}
 
 	SetPadding(left, top, right, bottom) {
@@ -226,6 +263,10 @@ const roseComponent = class {
 	SetBackColor(color) {
 		this.css`
 	    background-color : ${color}`;
+	}
+
+	OnMount(Fn) {
+		this.mounted ? Fn() : null;
 	}
 };
 
@@ -262,19 +303,6 @@ const rsvLAYOUT = class extends roseComponent {
 		type ? layoutFitApi(this.element, type, options) : null;
 	}
 
-	SetChildMargins(left, top, right, bottom) {
-		let cssString = css`
-			margin-left: ${left};
-			margin-top: ${top};
-			margin-right: ${right};
-			margin-bottom: ${bottom};
-		`;
-		let classname = $UId();
-		let classSTYLE = `.${classname} * { ${cssString} }`;
-		$Stl.innerHTML += classSTYLE;
-		this.element.classList.add(classname);
-	}
-
 	SetPosition(left, top, width, height) {
 		// TODO
 	}
@@ -287,6 +315,7 @@ const rsvHTMLELEMENT = class extends roseComponent {
 		this.element = document.createElement(element);
 
 		parent ? parent.AddChild(this) : null;
+		this.mounted = true;
 		options ? optionsApi(this.element, options) : null;
 
 		width ? (this.element.style.width = width) : null;
@@ -351,8 +380,8 @@ const optionsApi = (element, options) => {
 		vcenter: () => {
 			let cssString = css`
 				display: flex;
-				justify-content: center;
-				vertical-align: center;
+				justify-content: center; /* Horizontal alignment */
+				align-items: center; /* Vertical alignment */
 			`;
 			let classname = $UId();
 			let classSTYLE = `.${classname} { ${cssString} }`;
@@ -402,8 +431,8 @@ const optionsApi = (element, options) => {
 	};
 
 	options
-		.replace(/\s/, "")
 		.toLocaleLowerCase()
+		.replace(/\s/, "")
 		.split(",")
 		.forEach((el) => {
 			if (viewOptions.includes(el)) {
