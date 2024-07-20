@@ -66,10 +66,18 @@ export const roseComponent = class {
 	constructor() {
 		this.element = null;
 		this.elementUid = null;
+		this.elementProps = {
+			IsVisible: true,
+			IsAlive: true
+		};
 	}
 
-	/* roseView Methods Can Be Inherited */
+	/* ============= roseComponent Global Methods ===============*/
 
+	/**
+	 * Add a child to that element
+	 * @param {InstanceType<roseComponent>} child
+	 */
 	AddChild(child) {
 		if (child instanceof roseComponent) {
 			this.element.appendChild(child.element);
@@ -77,29 +85,11 @@ export const roseComponent = class {
 			console.error("Mounted Child Is Not A roseComponent");
 		}
 	}
-	RemoveChild(child) {
-		if (child instanceof roseComponent) {
-			child.element.remove();
-		} else {
-			console.error("Child Is Not A roseComponent");
-		}
-	}
 
-	Hide() {
-		this.element.style = this.css`
-        visibility : hidden;`;
-	}
-
-	Show() {
-		this.element.style = this.css`
-        visibility : visible;`;
-	}
-
-	Gone() {
-		this.element.style = this.css`
-        display : none;`;
-	}
-
+	/**
+	 * Add Css To That Element
+	 * @param {css} strings
+	 */
 	css(strings, ...values) {
 		let cssString = strings.reduce((result, str, i) => {
 			return result + str + (values[i] || "");
@@ -117,37 +107,117 @@ export const roseComponent = class {
 		this.element.classList.add(`${uid}`);
 	}
 
-	html(strings, ...values) {
+	/**
+	 * Add The InnerHTML Of That Element
+	 * @param {htmlString} strings
+	 */
+	SetHtml(strings, ...values) {
 		let htmlString = strings.reduce((result, str, i) => {
 			return result + str + (values[i] || "");
 		}, "");
 		this.element.innerHtml = htmlString;
 	}
+
+	/**
+	 * Remove The Child
+	 * @param {Object<roseComponent>} child
+	 */
+	RemoveChild(child) {
+		if (child instanceof roseComponent) {
+			child.element.remove();
+			this.elementProps.IsAlive = false;
+		} else {
+			console.error("Child Is Not A roseComponent");
+		}
+	}
+
+	/**
+	 * Hide The Element
+	 */
+	Hide() {
+		this.element.style = this.css`
+        visibility : hidden;`;
+		this.elementProps.IsVisible = false;
+	}
+
+	/**
+	 * Show The Element
+	 */
+	Show() {
+		this.element.style = this.css`
+        visibility : visible;`;
+		this.elementProps.IsVisible = true;
+	}
+
+	/**
+	 * Set the visibility of this element
+	 * so it takes no space in the layout
+	 * and is hidden from view
+	 */
+	Gone() {
+		this.element.style = this.css`
+        display : none;`;
+		this.elementProps.IsVisible = false;
+	}
+
+	/**
+	 * Set the visibility of this element
+	 * can be : visible or hidden
+	 * @param {string} mode
+	 */
+	SetVisibility(mode) {
+		if (mode.toLowerCase() == "show") {
+			this.element.style = this.css`
+			visibility : visible;`;
+			this.elementProps.IsVisible = true;
+		}
+		if (mode.toLowerCase() == "hide") {
+			this.element.style = this.css`
+			visibility : hidden;`;
+			this.elementProps.IsVisible = true;
+		} else {
+			this.element.style = this.css`
+			display : none;`;
+			this.elementProps.IsVisible = false;
+		}
+	}
+
+	/**
+	 * @returns boolean
+	 */
+	IsVisible() {
+		return Boolean(this.elementProps.IsVisible);
+	}
+
+	/**
+	 * @returns boolean
+	 */
+	IsAlive() {
+		return Boolean(this.elementProps.IsAlive);
+	}
+
+	SetMargins(left, top, right, bottom) {
+		this.css`
+		margin-left: ${left};
+		margin-top: ${top};
+		margin-right: ${right};
+		margin-bottom: ${bottom};
+		`;
+	}
+
+	SetPadding(left, top, right, bottom) {
+		this.css`
+		padding-left: ${left};
+		padding-top: ${top};
+		padding-right: ${right};
+		padding-bottom: ${bottom};
+		`;
+	}
 };
 
-/* Internal OnBack - back/forward navigation  Function */
-
-window.addEventListener("popstate", (event) => {
-	const page = location.pathname === "/" ? "main" : location.pathname.substring(1);
-	rsv.NavigateTo(page);
-});
-
-/* roseView Global Object */
+/* =============== roseView Global Object =============== */
 
 export const rsv = new (function () {
-	this._LoadScript = (script, onLoadFunc) => {
-		let file = document.createElement("script");
-		file.src = script;
-		file.onload = () => {
-			onLoadFunc();
-		};
-
-		file.onerror = () => {
-			console.info(`File Did Not Load : ${script}`);
-		};
-		document.head[0].appendChild(file);
-	};
-
 	this.CreateLayout = (type, options) => {
 		return new rsvLAYOUT(type, options);
 	};
@@ -160,7 +230,15 @@ export const rsv = new (function () {
 		}
 	};
 
-	this.NavigateTo = (page, transition) => {
+	this.AddLayout = (layout, type, options) => {
+		layout.css`
+        width: 100%;
+        height: 100%;
+        `;
+		document.body.appendChild(layout.element);
+	};
+
+	this.StartApp = (appRoute, transition) => {
 		const navigate = (page) => {
 			let pageUrl = `./routeFolder/${page}.js`;
 
@@ -202,16 +280,6 @@ export const rsv = new (function () {
 
 		page ? navigate(page) : console.error("Cannot Navigate");
 	};
-
-	this.AddLayout = (mainLayout, appRoutes) => {
-		mainLayout.css`
-        width: 100%;
-        height: 100%;
-        `;
-		document.body.appendChild(mainLayout.element);
-
-		appRoutes ? (this._Pages = appRoutes) : null;
-	};
 })();
 
 const rsvLAYOUT = class extends roseComponent {
@@ -221,6 +289,23 @@ const rsvLAYOUT = class extends roseComponent {
 		this.element = document.createElement("div");
 
 		type ? layoutFitApi(this.element, type, options) : null;
+	}
+
+	SetChildMargins(left, top, right, bottom) {
+		let cssString = css`
+			margin-left: ${left};
+			margin-top: ${top};
+			margin-right: ${right};
+			margin-bottom: ${bottom};
+		`;
+		let classname = $UId();
+		let classSTYLE = `.${classname} * { ${cssString} }`;
+		$STL.innerHTML += classSTYLE;
+		this.element.classList.add(classname);
+	}
+
+	SetPosition(left, top, width, height) {
+		// TODO
 	}
 };
 

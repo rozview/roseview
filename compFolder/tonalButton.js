@@ -7,7 +7,7 @@ const TonalButton = class extends roseComponent {
 		super();
 		this.element = rsv.AddHtmlEl(parent, "button");
 
-		this.element.css`
+		this.element.AddCSS`
         border: 2px solid #6200ea; /* Material design purple */
         color: #6200ea; /* Text color matching the border */
         background-color: transparent; /* Transparent background */

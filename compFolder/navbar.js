@@ -1,12 +1,12 @@
 import { rsv, roseComponent } from "../roseview/core.js";
 
-const navbar = class extends roseComponent {
+const NavBar = class extends roseComponent {
 	constructor(parent) {
 		super();
 
 		this.element = rsv.AddHtmlEl(parent, "nav", "horizontal");
 
-		this.element.css`
+		this.element.AddCSS`
         background-color: #00000000;
         backdrop-filter: blur(1.5rem);
         width: 100%;
@@ -23,8 +23,8 @@ const navbar = class extends roseComponent {
         `;
 
 		this.title = rsv.AddHtmlEl(this.element, "span");
-		this.title.textContent = "viewml.js";
-		this.title.css`
+		this.title.textContent = "roseview.js";
+		this.title.AddCSS`
         font-family: "Archivo", sans-serif;
         font-weight: 700;
         font-size: 18px;
@@ -33,4 +33,4 @@ const navbar = class extends roseComponent {
 	}
 };
 
-export default navbar;
+export default NavBar;

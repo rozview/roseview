@@ -7,6 +7,8 @@ roseview can be classified as a single multipage app framework (SMPA)
 
 roseview aims to keep android app development similarities.
 
+roseview is inspired by DroidScript.
+
 ## roseview Explained
 
 Android has the concept of layouts and views, in roseview layouts are refered to as roseViews and components like a button or a text are retered to as roseComponents.
@@ -18,30 +20,30 @@ To get started create an index.html file with this structure:
 ```html
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<style id="main"></style>
-		<style>
-			html,
-			body {
-				margin: 0;
-				width: 100%;
-				height: 100%;
-				overflow-x: hidden;
-			}
-		</style>
-	</head>
+ <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style id="main"></style>
+  <style>
+   html,
+   body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+   }
+  </style>
+ </head>
 
-	<body>
-		<script type="module">
-			import { OnStart } from "./App.js";
+ <body>
+  <script type="module">
+   import { OnStart } from "./App.js";
 
-			document.addEventListener("DOMContentLoaded", () => {
-				OnStart();
-			});
-		</script>
-	</body>
+   document.addEventListener("DOMContentLoaded", () => {
+    OnStart();
+   });
+  </script>
+ </body>
 </html>
 ```
 
@@ -53,15 +55,15 @@ import { rsv, roseConfig } from "./roseview/core.js";
 roseConfig.Title = "roseView Framework";
 
 export function OnStart() {
-	let lay = rsv.CreateLayout("linear", "center");
+ let lay = rsv.CreateLayout("linear", "center");
 
-	rsv.AddLayout(lay);
+ rsv.AddLayout(lay);
 }
 ```
 
 You have made a basic app, now it is time to explain that code:
 
--   The OnStart function is basically where your program starts
+- The OnStart function is basically where your program starts
 
 There are 5 types of layouts, the linear layout describes the contents flow, vertically or horizontally.
 There are more but will be described in the exalidraw file below.
@@ -127,24 +129,14 @@ let btn = rsv.AddHtmlEl(lay, "button");
 /* Do Not Do This, Except If its one call */
 btn.style.marginTop = "10px";
 
-/* Do This - 
-   Great If You Will Use Non Css Usable Stuff
-   i.e. textContent
-*/
+
 btn.batch({
-	marginTop: "10px",
-	textContent: "Hello World"
+ marginTop: "10px",
+ textContent: "Hello World"
 });
 
-/* Or Do This */
 
-btn.batch(css`
-	margin-top: 10px;
-`);
-
-/* this can either use DocumentFragment or
-If its not an object but css it will add it
-as a class */
+/* This will make use of document fragments */
 ```
 
 You can build custom components by extending the roseComponent class and exporting the component and adding it using `AddHtmlEl`. Here is an example :
@@ -157,12 +149,11 @@ import { rsv, roseComponent } from "../roseview/core.js";
 /** CSS Code Made By ChatGPT */
 
 const TonalButton = class extends roseComponent {
-	constructor(parent, text, width = -1, height = -1) {
-		super();
-		this.element = rsv.AddHtmlEl(parent, "button");
-		this.element.textContent = text;
+ constructor(parent, text, width = -1, height = -1) {
+  super();
+  this.element = rsv.AddHtmlEl(parent, "button");
 
-		this.element.css`
+  this.element.css`
         border: 2px solid #6200ea; /* Material design purple */
         color: #6200ea; /* Text color matching the border */
         background-color: transparent; /* Transparent background */
@@ -185,12 +176,15 @@ const TonalButton = class extends roseComponent {
         }
         `;
 
-		this.El = this.element.style;
+  this.El = this.element.style;
 
-		width ? (this.El.width = width) : "fit-content";
-		height ? (this.El.height = height) : "fit-content";
-		return this.element;
-	}
+ }
+
+ props(text, width, height){
+    this.element.textContent = text;
+    width ? (this.El.width = width) : "fit-content";
+    height ? (this.El.height = height) : "fit-content";
+ }
 };
 
 export default TonalButton;
@@ -206,10 +200,11 @@ import TonalButton from "./compFolder/tonalButton.js";
 roseConfig.Title = "roseView Framework";
 
 export function OnStart() {
-	let lay = rsv.CreateLayout("linear", "center");
+ let lay = rsv.CreateLayout("linear", "center");
 
-	let btn = rsv.AddHtmlEl(lay, TonalButton);
-	rsv.AddLayout(lay);
+ let btn = rsv.AddHtmlEl(lay, TonalButton);
+ btn.props('Hello World', '200px', 'auto')
+ rsv.AddLayout(lay);
 }
 ```
 
