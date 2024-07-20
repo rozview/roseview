@@ -8,23 +8,32 @@
  *
  */
 
-const DW = window.innerWidth;
-const DH = window.innerHeight;
+const DW = window.innerWidth + "px";
+const DH = window.innerHeight + "px";
 
 const $Q = (a) => document.querySelector(a);
 
-const $STL = document.getElementById("main");
+const $T = (id, lang) => {};
+
+const $El = (a) => document.getElementById(a);
 
 let animatelib = document.createElement("link");
 animatelib.href = "./animate.min.css";
-animatelib.rel = "text/stylesheey";
+animatelib.rel = "text/stylesheet";
 
 let tweenlib = document.createElement("script");
+tweenlib.type = "script";
 tweenlib.src = "./tween.min.js";
-$Q(head).appendChild(animatelib);
-$Q(head).appendChild(tweenlib);
+$Q("head").appendChild(animatelib);
+$Q("head").appendChild(tweenlib);
 
-const cfg = {
+let mainstyle = document.createElement("style");
+mainstyle.id = "styles";
+$Q("head").appendChild(mainstyle);
+
+const $Stl = document.getElementById("styles");
+
+const roseConfig = {
 	get Landscape() {
 		lockOrientation("landscape");
 	},
@@ -44,13 +53,6 @@ const lockOrientation = (orient) => {
 	} catch (err) {
 		console.info(err);
 	}
-};
-
-const T = (text, langId) => {
-	//TODO
-	/**
-	 * Translation Function
-	 */
 };
 
 const $UId = () => {
@@ -110,7 +112,7 @@ const roseComponent = class {
             ${cssString}
         }`;
 
-		$STL.innerHTML += classSTYLE;
+		$Stl.innerHTML += classSTYLE;
 		this.element.classList.add(`${uid}`);
 	}
 
@@ -234,7 +236,7 @@ const rsv = new (function () {
 		return new rsvLAYOUT(type, options);
 	};
 
-	this.AddHtmlEl = (parent, element, options, width, height) => {
+	this.HtmlEl = (parent, element, options, width, height) => {
 		if (typeof element === "function") {
 			return new element(parent, options, width, height);
 		} else {
@@ -269,7 +271,7 @@ const rsvLAYOUT = class extends roseComponent {
 		`;
 		let classname = $UId();
 		let classSTYLE = `.${classname} * { ${cssString} }`;
-		$STL.innerHTML += classSTYLE;
+		$Stl.innerHTML += classSTYLE;
 		this.element.classList.add(classname);
 	}
 
@@ -322,7 +324,7 @@ const optionsApi = (element, options) => {
 			`;
 			let classname = $UId();
 			let classSTYLE = `.${classname} { ${cssString} }`;
-			$STL.innerHTML += classSTYLE;
+			$Stl.innerHTML += classSTYLE;
 			element.classList.add(classname);
 		},
 		right: () => {
@@ -332,7 +334,7 @@ const optionsApi = (element, options) => {
 			`;
 			let classname = $UId();
 			let classSTYLE = `.${classname} { ${cssString} }`;
-			$STL.innerHTML += classSTYLE;
+			$Stl.innerHTML += classSTYLE;
 			element.classList.add(classname);
 		},
 		center: () => {
@@ -343,7 +345,7 @@ const optionsApi = (element, options) => {
 			`;
 			let classname = $UId();
 			let classSTYLE = `.${classname} { ${cssString} }`;
-			$STL.innerHTML += classSTYLE;
+			$Stl.innerHTML += classSTYLE;
 			element.classList.add(classname);
 		},
 		vcenter: () => {
@@ -354,7 +356,7 @@ const optionsApi = (element, options) => {
 			`;
 			let classname = $UId();
 			let classSTYLE = `.${classname} { ${cssString} }`;
-			$STL.innerHTML += classSTYLE;
+			$Stl.innerHTML += classSTYLE;
 			element.classList.add(classname);
 		},
 		bottom: () => {
@@ -364,7 +366,7 @@ const optionsApi = (element, options) => {
 			`;
 			let classname = $UId();
 			let classSTYLE = `.${classname} { ${cssString} }`;
-			$STL.innerHTML += classSTYLE;
+			$Stl.innerHTML += classSTYLE;
 			element.classList.add(classname);
 		},
 		top: () => {
@@ -374,7 +376,7 @@ const optionsApi = (element, options) => {
 			`;
 			let classname = $UId();
 			let classSTYLE = `.${classname} { ${cssString} }`;
-			$STL.innerHTML += classSTYLE;
+			$Stl.innerHTML += classSTYLE;
 			element.classList.add(classname);
 		},
 		horizontal: () => {
@@ -384,7 +386,7 @@ const optionsApi = (element, options) => {
 			`;
 			let classname = $UId();
 			let classSTYLE = `.${classname} { ${cssString} }`;
-			$STL.innerHTML += classSTYLE;
+			$Stl.innerHTML += classSTYLE;
 			element.classList.add(classname);
 		},
 		vertical: () => {
@@ -394,18 +396,22 @@ const optionsApi = (element, options) => {
 			`;
 			let classname = $UId();
 			let classSTYLE = `.${classname} { ${cssString} }`;
-			$STL.innerHTML += classSTYLE;
+			$Stl.innerHTML += classSTYLE;
 			element.classList.add(classname);
 		}
 	};
 
-	options.split(",").forEach((el) => {
-		if (viewOptions.includes(el)) {
-			functions[el]();
-		} else {
-			console.error(`Unknown option: ${el}`);
-		}
-	});
+	options
+		.replace(/\s/, "")
+		.toLocaleLowerCase()
+		.split(",")
+		.forEach((el) => {
+			if (viewOptions.includes(el)) {
+				functions[el]();
+			} else {
+				console.error(`Unknown option: ${el}`);
+			}
+		});
 };
 
 function layoutFitApi(layout, type, options) {
@@ -426,3 +432,5 @@ function layoutFitApi(layout, type, options) {
 		layout.style.position = "absolute";
 	} else console.error("Unknown Layout ", layout);
 }
+
+export { DW, DH, $Q, $T, $El, $Stl, $UId, rsv, roseConfig, roseComponent };
