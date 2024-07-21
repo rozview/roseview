@@ -1,6 +1,6 @@
 {
 	"name": "roseview",
-	"version": "0.0.4",
+	"version": "0.0.5",
 	"description": "The Framework For Staying In The Flow",
 	"main": "./roseviewsdk/roseview.core.js",
 	"repository": {
