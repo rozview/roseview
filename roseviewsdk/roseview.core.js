@@ -245,7 +245,7 @@ const createElement = (parent, element, options, width, height) => {
 	return new rsvHTMLELEMENT(parent, element, options, width, height);
 };
 
-const renderApplication = (mainLayout, appRoutes) => {
+const createApplication = (mainLayout, appRoutes) => {
 	mainLayout.setStyle({
 		width: "100%",
 		height: "100%"
@@ -387,4 +387,4 @@ function layoutFitApi(layout, type, options) {
 	} else console.error("Unknown Layout ", layout);
 }
 
-export { DW, DH, $Q, $T, $El, $UId, createLayout, createElement, roseConfig, roseComponent, renderApplication };
+export { DW, DH, $Q, $T, $El, $UId, createLayout, createElement, roseConfig, roseComponent, createApplication };

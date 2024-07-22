@@ -1,8 +1,4 @@
-import { createLayout, createElement, renderApplication, $Q, roseConfig } from "./roseviewsdk/roseview.core.js";
-
-//import { annotate } from "https://unpkg.com/rough-notation?module";
-
-import OutlinedButton from "./compFolder/outlinedbtn.js";
+import { createLayout, createElement, createApplication, roseConfig } from "./roseviewsdk/roseview.core.js";
 
 export function OnStart() {
 	let layout = createLayout("linear", "top,vertical");
@@ -66,16 +62,7 @@ export function OnStart() {
 		color: "#213547"
 	});
 
-	//let testBtn = OutlinedButton(taglineDiv, "Why roseView ?", "180px", "fit-content");
-
-	/*
-	setTimeout(() => {
-		let annotation = annotate($Q("#miniTagline"), { type: "underline" });
-		annotation.show();
-	}, 1500); 
-    */
-
-	renderApplication(layout);
+	createApplication(layout);
 
 	roseConfig.globalStyle`
         @media (max-width: 794px) {
