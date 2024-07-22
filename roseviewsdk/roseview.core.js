@@ -1,10 +1,9 @@
 /**
  * roseView Engine is a framework that allows you
  * to write ui declarativley.
- * roseview Engine borrows concepts
- *  from Android development
- * and mixes them with the power
- * of web development concepts like css.
+ *
+ *@author
+ * Oarabile Koore
  *
  * @license
  * MIT
@@ -29,12 +28,6 @@ tweenlib.src = "./tween.min.js";
 $Q("head").appendChild(animatelib);
 $Q("head").appendChild(tweenlib);
 
-let mainstyle = document.createElement("style");
-mainstyle.id = "styles";
-$Q("head").appendChild(mainstyle);
-
-const $Stl = document.getElementById("styles");
-
 const roseConfig = {
 	get Landscape() {
 		lockOrientation("landscape");
@@ -44,25 +37,11 @@ const roseConfig = {
 		lockOrientation("portrait");
 	},
 
-	/**
-	 * Sets Document Title
-	 */
 	set Title(title) {
 		document.title = title;
 	},
 
-	/**
-	 * Sets the global css great for media queries
-	 * @param {*} strings
-	 * @param  {...any} values
-	 */
-	globalStyle(strings, ...values) {
-		let cssString = strings.reduce((result, str, i) => {
-			return result + str + (values[i] || "");
-		}, "");
-
-		$Stl.innerHTML += cssString;
-	}
+	set Icon(path) {}
 };
 
 const lockOrientation = (orient) => {
@@ -71,22 +50,6 @@ const lockOrientation = (orient) => {
 	} catch (err) {
 		console.info(err);
 	}
-};
-
-const $UId = () => {
-	const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-	let uid = "";
-	for (let i = 0; i < 7; i++) {
-		uid += chars.charAt(Math.floor(Math.random() * chars.length));
-	}
-	return uid;
-};
-
-const css = (strings, ...values) => {
-	let cssString = strings.reduce((result, str, i) => {
-		return result + str + (values[i] || "");
-	}, "");
-	return cssString;
 };
 
 const roseComponent = class {
@@ -186,14 +149,14 @@ const roseComponent = class {
 	 * @param {object} styles
 	 */
 	setStyle(styles) {
-		const className = cssInJS(styles);
+		const className = cssObjectParser(styles);
 		this.element.classList.add(className);
 	}
 
 	/** ====================== COMPONENT LIFECYCLE METHODS ======================  */
 	onMount(Fn) {}
 
-	onDismount() {}
+	onDismount(Fn) {}
 };
 
 const generateClassName = (() => {
@@ -201,41 +164,57 @@ const generateClassName = (() => {
 	return () => `rsv-class-${counter++}`;
 })();
 
-const cssInJS = (styles) => {
+const cssObjectParser = (styles) => {
 	const className = generateClassName();
 	const styleSheet = document.styleSheets[0] || document.head.appendChild(document.createElement("style")).sheet;
 
 	let cssString = "";
-	let pseudoCssRules = [];
+	let nestedCssRules = [];
+	let mediaQueryRules = [];
 
-	// Separate base styles and pseudo-class styles
-	Object.entries(styles).forEach(([key, value]) => {
-		if (key.startsWith(":")) {
-			// Handle pseudo-classes
-			pseudoCssRules.push({
-				pseudoClass: key,
-				styles: value
-			});
-		} else {
-			cssString += `${key.replace(/([A-Z])/g, "-$1").toLowerCase()}: ${value}; `;
+	const parseStyles = (styles, selector) => {
+		let baseStyles = "";
+		Object.entries(styles).forEach(([key, value]) => {
+			if (typeof value === "object") {
+				if (key.startsWith("@")) {
+					mediaQueryRules.push({ media: key, selector, styles: value });
+				} else {
+					/* For  pseudo-classes and nested selectors  */
+					nestedCssRules.push({ selector: `${selector}${key}`, styles: value });
+				}
+			} else {
+				baseStyles += `${key.replace(/([A-Z])/g, "-$1").toLowerCase()}: ${value}; `;
+			}
+		});
+		return baseStyles;
+	};
+
+	cssString = parseStyles(styles, `.${className}`);
+
+	if (cssString) {
+		styleSheet.insertRule(`.${className} { ${cssString} }`, styleSheet.cssRules.length);
+	}
+
+	nestedCssRules.forEach(({ selector, styles }) => {
+		const nestedCssString = parseStyles(styles, selector);
+		if (nestedCssString) {
+			const rule = `${selector} { ${nestedCssString} }`;
+			styleSheet.insertRule(rule, styleSheet.cssRules.length);
 		}
 	});
 
-	// Insert base style rule
-	styleSheet.insertRule(`.${className} { ${cssString} }`, styleSheet.cssRules.length);
-
-	// Insert pseudo-class style rules
-	pseudoCssRules.forEach(({ pseudoClass, styles }) => {
-		const pseudoCssString = Object.entries(styles)
-			.map(([k, v]) => `${k.replace(/([A-Z])/g, "-$1").toLowerCase()}: ${v};`)
-			.join(" ");
-		styleSheet.insertRule(`.${className}${pseudoClass} { ${pseudoCssString} }`, styleSheet.cssRules.length);
+	mediaQueryRules.forEach(({ media, selector, styles }) => {
+		const nestedCssString = parseStyles(styles, selector);
+		if (nestedCssString) {
+			const rule = `${media} { ${selector} { ${nestedCssString} } }`;
+			styleSheet.insertRule(rule, styleSheet.cssRules.length);
+		}
 	});
 
 	return className;
 };
 
-/* =============== roseView Engine Global Object =============== */
+/* =============== roseView Engine Exports  =============== */
 
 const createLayout = (type, options) => {
 	return new rsvLAYOUT(type, options);
@@ -302,21 +281,21 @@ let viewOptions = ["top", "bottom", "left", "right", "horizontal", "vertical", "
 const optionsApi = (element, options) => {
 	const functions = {
 		left: () => {
-			let className = cssInJS({
+			let className = cssObjectParser({
 				display: "flex",
 				justifyContent: "flex-start"
 			});
 			element.classList.add(className);
 		},
 		right: () => {
-			let className = cssInJS({
+			let className = cssObjectParser({
 				display: "flex",
 				justifyContent: "flex-end"
 			});
 			element.classList.add(className);
 		},
 		center: () => {
-			let className = cssInJS({
+			let className = cssObjectParser({
 				display: "flex",
 				alignItems: "center",
 				justifyContent: "center"
@@ -324,7 +303,7 @@ const optionsApi = (element, options) => {
 			element.classList.add(className);
 		},
 		vcenter: () => {
-			let className = cssInJS({
+			let className = cssObjectParser({
 				display: "flex",
 				justifyContent: "center",
 				alignItems: "center"
@@ -332,28 +311,28 @@ const optionsApi = (element, options) => {
 			element.classList.add(className);
 		},
 		bottom: () => {
-			let className = cssInJS({
+			let className = cssObjectParser({
 				display: "flex",
 				alignItems: "flex-end"
 			});
 			element.classList.add(className);
 		},
 		top: () => {
-			let className = cssInJS({
+			let className = cssObjectParser({
 				display: "flex",
 				alignItems: "flex-start"
 			});
 			element.classList.add(className);
 		},
 		horizontal: () => {
-			let className = cssInJS({
+			let className = cssObjectParser({
 				display: "flex",
 				flexDirection: "row"
 			});
 			element.classList.add(className);
 		},
 		vertical: () => {
-			let className = cssInJS({
+			let className = cssObjectParser({
 				display: "flex",
 				flexDirection: "column"
 			});
@@ -363,7 +342,7 @@ const optionsApi = (element, options) => {
 
 	options
 		.toLocaleLowerCase()
-		.replace(/\s/, "")
+		.replace(/\s/g, "")
 		.split(",")
 		.forEach((el) => {
 			if (viewOptions.includes(el)) {
@@ -380,11 +359,11 @@ function layoutFitApi(layout, type, options) {
 	let layoutTYPE = type.toLowerCase();
 
 	if (layoutTYPE == "linear") {
-		let className = cssInJS({
+		let className = cssObjectParser({
 			display: "flex"
 		});
 		layout.classList.add(className);
 	} else console.error("Unknown Layout ", layout);
 }
 
-export { DW, DH, $Q, $T, $El, $UId, createLayout, createElement, roseConfig, roseComponent, createApplication };
+export { DW, DH, $Q, $T, $El, roseConfig, createLayout, createElement, createApplication };

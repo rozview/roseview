@@ -1,6 +1,6 @@
 import { createElement } from "../roseviewsdk/roseview.core.js";
 
-const OutlinedButton = function (parent, text, width, height) {
+const outlinedButton = function (parent, text, width, height) {
 	let btn = createElement(parent, "button", null, width, height);
 	text ? (btn.textContent = text) : null;
 	btn.setStyle({
@@ -13,6 +13,8 @@ const OutlinedButton = function (parent, text, width, height) {
 		textAlign: "center",
 		cursor: "pointer",
 		padding: "0.5rem 1rem",
+		fontFamily: "'Playfair Display', serif",
+		fontWeight: 700,
 		transition: "background-color 0.3s, color 0.3s",
 
 		":hover": {
@@ -22,9 +24,17 @@ const OutlinedButton = function (parent, text, width, height) {
 		":active": {
 			backgroundColor: "#3700b3",
 			borderColor: "#3700b3"
+		},
+		"@media (max-width: 600px)": {
+			fontSize: "0.8rem",
+			padding: "0.4rem 0.8rem"
+		},
+		" > span": {
+			/* Demo Of Element Selector */
+			color: "red"
 		}
 	});
 	return btn;
 };
 
-export default OutlinedButton;
+export default outlinedButton;

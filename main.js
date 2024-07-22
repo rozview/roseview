@@ -1,5 +1,7 @@
 import { createLayout, createElement, createApplication, roseConfig } from "./roseviewsdk/roseview.core.js";
 
+import outlinedButton from "./components/outlinedbtn.js";
+
 export function OnStart() {
 	let layout = createLayout("linear", "top,vertical");
 
@@ -24,10 +26,14 @@ export function OnStart() {
 		letterSpacing: "0.8px",
 		fontSize: "1.2rem",
 		fontWeight: 700,
-		marginLeft: "80px"
+		marginLeft: "80px",
+
+		"@media (max-width: 794px)": {
+			marginLeft: "25px"
+		}
 	});
 
-	let contentLay = createLayout("linear", "top, vcenter");
+	let contentLay = createLayout("linear", "top, vcenter, vertical");
 	layout.addChild(contentLay);
 
 	contentLay.setStyle({
@@ -35,11 +41,17 @@ export function OnStart() {
 		height: "fit-content"
 	});
 
-	let taglineDiv = createElement(contentLay, "div", "center,vertical");
+	let taglineDiv = createLayout("linear", "center,vertical");
+	contentLay.addChild(taglineDiv);
+
 	taglineDiv.id = "taglineDiv";
 	taglineDiv.setStyle({
 		width: "100%",
-		height: "fit-content"
+		height: "fit-content",
+
+		"@media (max-width: 794px)": {
+			width: "80%"
+		}
 	});
 
 	let tagline = createElement(taglineDiv, "h1");
@@ -49,7 +61,12 @@ export function OnStart() {
 		fontFamily: "'Archivo', sans-serif",
 		fontSize: "48px",
 		fontWeight: 500,
-		color: "#213547"
+		color: "#213547",
+
+		"@media (max-width: 794px)": {
+			fontSize: "48px",
+			letterSpacing: "-.5px"
+		}
 	});
 
 	let miniTagline = createElement(taglineDiv, "p");
@@ -62,22 +79,12 @@ export function OnStart() {
 		color: "#213547"
 	});
 
-	createApplication(layout);
+	let whyRoseBtn = outlinedButton(contentLay, "why roseView ?", "180px", "auto");
+	whyRoseBtn.setStyle({
+		marginTop: "25px"
+	});
 
-	roseConfig.globalStyle`
-        @media (max-width: 794px) {
-            #navTitle {
-                margin-left: 25px;
-            }
-            #taglineDiv {
-                width: 80%;
-            }
-            #tagline { 
-                font-size: 48px;
-                letter-spacing: -.5px;
-            }
-        }
-    `;
+	createApplication(layout);
 
 	roseConfig.Title = "roseview Framework";
 }
