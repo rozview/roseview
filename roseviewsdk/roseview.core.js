@@ -28,25 +28,9 @@ tweenlib.src = "./tween.min.js";
 $Q("head").appendChild(animatelib);
 $Q("head").appendChild(tweenlib);
 
-const roseConfig = {
-	get Landscape() {
-		lockOrientation("landscape");
-	},
-
-	get Portrait() {
-		lockOrientation("portrait");
-	},
-
-	set Title(title) {
-		document.title = title;
-	},
-
-	set Icon(path) {}
-};
-
-const lockOrientation = (orient) => {
+const lockOrientation = async (orient) => {
 	try {
-		screen.orientation.lock(orient);
+		await screen.orientation.lock(orient);
 	} catch (err) {
 		console.info(err);
 	}
@@ -214,22 +198,10 @@ const cssObjectParser = (styles) => {
 	return className;
 };
 
-/* =============== roseView Engine Exports  =============== */
+/* ==================================== roseView Engine Exports  ==================================== */
 
 const createLayout = (type, options) => {
 	return new rsvLAYOUT(type, options);
-};
-
-const createElement = (parent, element, options, width, height) => {
-	return new rsvHTMLELEMENT(parent, element, options, width, height);
-};
-
-const createApplication = (mainLayout, appRoutes) => {
-	mainLayout.setStyle({
-		width: "100%",
-		height: "100%"
-	});
-	document.body.appendChild(mainLayout.element);
 };
 
 const rsvLAYOUT = class extends roseComponent {
@@ -242,7 +214,11 @@ const rsvLAYOUT = class extends roseComponent {
 	}
 };
 
-const rsvHTMLELEMENT = class extends roseComponent {
+const createElement = (parent, elment, options, width, height) => {
+	return new rsvElement(parent, elment, options, width, height);
+};
+
+const rsvElement = class extends roseComponent {
 	constructor(parent, element, options, width, height) {
 		super();
 
@@ -273,6 +249,100 @@ const rsvHTMLELEMENT = class extends roseComponent {
 				return true;
 			}
 		});
+	}
+};
+
+const createApplication = (mainLayout, routes) => {
+	window.pathHistory = [];
+	document.addEventListener("DOMContentLoaded", () => {
+		mainLayout.setStyle({
+			width: "100%",
+			height: "100%"
+		});
+		document.body.appendChild(mainLayout.element);
+	});
+
+	window.routes = routes;
+	window.pathHistory.push("/");
+	window.addEventListener("popstate", (event) => handleRouteChange(event));
+};
+
+const createPage = (pageLayout, currentPage) => {
+	pageLayout.setStyle({
+		width: "100%",
+		height: "100%"
+	});
+	document.body.appendChild(pageLayout.element);
+};
+
+const handleRouteChange = (event) => {
+	const lastPath = window.pathHistory[window.pathHistory.length - 1];
+	const nextPage = event.state ? event.state.path : window.location.pathname;
+	const nextPath = nextPage ? nextPage : window.pathHistory[window.pathHistory.length - 1];
+	
+	if (nextPage === "/") {
+		const script = document.createElement("script");
+		script.src = `./main.js`;
+		script.type = "module";
+
+		document.body.replaceChildren();
+		$Q("body").appendChild(script);
+		console.log("last Path", lastPath);
+		console.log("next Path", nextPath);
+		console.log("next Page", nextPage);
+	} else {
+		console.log("last Path", lastPath);
+		console.log("next Path", nextPath);
+		console.log("next Page", nextPage);
+	}
+
+	window.pathHistory.pop();
+
+	//window.history.pushState({}, null, window.location.origin + "/" + nextPage);
+};
+const roseConfig = {
+	/**
+	 * Page route
+	 * @param {string} path
+	 */
+	OpenPage(path) {
+		const script = document.createElement("script");
+		script.src = `./routes/${path}.js`;
+		script.type = "module";
+		script.setAttribute("data-dynamic-script", "true");
+
+		document.body.replaceChildren();
+		$Q("body").appendChild(script);
+		window.pathHistory.push(path);
+		window.history.pushState({}, null, window.location.origin + "/" + path);
+	},
+
+	get Landscape() {
+		lockOrientation("landscape");
+		88;
+		return "landscape";
+	},
+	get Portrait() {
+		lockOrientation("portrait");
+		return "portrait";
+	},
+
+	/**
+	 * @param {string} title
+	 */
+	set Title(title) {
+		document.title = title;
+	},
+
+	/**
+	 * @param {string} path
+	 */
+	set Icon(path) {
+		const link = document.querySelector("link[rel*='icon']") || document.createElement("link");
+		link.type = "image/x-icon";
+		link.rel = "shortcut icon";
+		link.href = path;
+		document.getElementsByTagName("head")[0].appendChild(link);
 	}
 };
 
@@ -366,4 +436,4 @@ function layoutFitApi(layout, type, options) {
 	} else console.error("Unknown Layout ", layout);
 }
 
-export { DW, DH, $Q, $T, $El, roseConfig, createLayout, createElement, createApplication };
+export { DW, DH, $Q, $T, $El, roseConfig, createLayout, createElement, createPage, createApplication };

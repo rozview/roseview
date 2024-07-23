@@ -1,8 +1,8 @@
-import { createLayout, createElement, createApplication, roseConfig } from "./roseviewsdk/roseview.core.js";
+import { roseConfig, createLayout, createElement, createApplication } from "./roseviewsdk/roseview.core.js";
 
 import outlinedButton from "./components/outlinedbtn.js";
 
-export function OnStart() {
+const Application = function () {
 	let layout = createLayout("linear", "top,vertical");
 
 	let navbar = createElement(layout, "nav", "vcenter, left");
@@ -84,7 +84,19 @@ export function OnStart() {
 		marginTop: "25px"
 	});
 
-	createApplication(layout);
+	let roseBlog = outlinedButton(contentLay, "roseView Blog", "180px", "auto");
+	roseBlog.setStyle({
+		marginTop: "25px"
+	});
+	roseBlog.onclick = function () {
+		roseConfig.OpenPage("blog");
+	};
 
 	roseConfig.Title = "roseview Framework";
-}
+
+	const router = [{ path: "/" }, { path: "/blog" }];
+
+	createApplication(layout, router);
+};
+
+Application();
