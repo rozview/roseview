@@ -14,7 +14,36 @@ const DH = window.innerHeight + "px";
 
 const $Q = (a) => document.querySelector(a);
 
-const $T = (id, lang) => {};
+let languageFilePromise = null;
+let currentLang = null;
+
+const $T = async (id, lang) => {
+	if (window.languageFile) {
+		return window.languageFile.translations[id][lang];
+	} else if (languageFilePromise) {
+		await languageFilePromise;
+		return window.languageFile.translations[id][lang];
+	} else {
+		languageFilePromise = fetch("./lang.json")
+			.then((response) => {
+				if (!response.ok) {
+					throw new Error("Cannot Load Translation Utility: " + response.status);
+				}
+				return response.json();
+			})
+			.then((json) => {
+				window.languageFile = json;
+				currentLang = window.languageFile.default;
+				return json.translations[id][lang];
+			})
+			.catch((error) => {
+				console.error("Error fetching the language file:", error);
+				throw error;
+			});
+
+		return languageFilePromise;
+	}
+};
 
 const $El = (a) => document.getElementById(a);
 
@@ -82,6 +111,7 @@ const roseComponent = class {
 
 	set onContextMenu(Fn) {
 		this.element.addEventListener("contextmenu", (event) => {
+			this.eventListeners.push(["contextmenu", Fn]);
 			event.preventDefault();
 			Fn();
 		});
@@ -136,6 +166,47 @@ const roseComponent = class {
 			display: "none"
 		});
 		this.elementProps.IsVisible = false;
+	}
+
+	async setTranslation(id, lang) {
+		this.element.setAttribute("data-translate-id", id);
+		if (languageFilePromise) {
+			await languageFilePromise;
+			this.element.textContent = window.languageFile.translations[id][lang];
+		} else {
+			languageFilePromise = fetch("./lang.json")
+				.then((response) => {
+					if (!response.ok) {
+						throw new Error("Cannot Load Translation Utility: " + response.status);
+					}
+					return response.json();
+				})
+				.then((json) => {
+					window.languageFile = json;
+					this.element.textContent = json.translations[id][lang];
+				})
+				.catch((error) => {
+					console.error("Error fetching the language file:", error);
+					throw error;
+				});
+
+			return languageFilePromise;
+		}
+	}
+};
+
+export const switchLang = async (lang) => {
+	currentLang = lang;
+	const elements = document.querySelectorAll("[data-translate-id]");
+	for (let element of elements) {
+		const id = element.getAttribute("data-translate-id");
+		$T(id, lang)
+			.then((translation) => {
+				element.textContent = translation;
+			})
+			.catch((error) => {
+				element.textContent = "Error loading translation";
+			});
 	}
 };
 
@@ -447,4 +518,4 @@ function layoutFitApi(layout, type, options) {
 	} else console.error("Unknown Layout ", layout);
 }
 
-export { DW, DH, $Q, $T, $El, roseConfig, createLayout, createElement, createPage, createApplication };
+export { DW, DH, $Q, $El, roseConfig, createLayout, createElement, createPage, createApplication };

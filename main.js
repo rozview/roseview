@@ -1,4 +1,4 @@
-import { roseConfig, createLayout, createElement, createApplication } from "./roseviewsdk/roseview.core.js";
+import { switchLang, roseConfig, createLayout, createElement, createApplication } from "./roseviewsdk/roseview.core.js";
 
 import outlinedButton from "./components/outlinedbtn.js";
 
@@ -7,6 +7,11 @@ const Application = function () {
 
 	let navbar = createElement(layout, "nav", "vcenter, left");
 
+	/*
+	navbar.batchDOMUpdates(() => {
+		navbar.style.backgroundColor = "green";
+	});
+	*/
 	navbar.setStyle({
 		backgroundColor: "rgba(255, 255, 255, 0.75)",
 		borderBottom: "0.8px solid rgb(226, 232, 240)",
@@ -44,7 +49,6 @@ const Application = function () {
 	let taglineDiv = createLayout("linear", "center,vertical");
 	contentLay.addChild(taglineDiv);
 
-	taglineDiv.id = "taglineDiv";
 	taglineDiv.setStyle({
 		width: "100%",
 		height: "fit-content",
@@ -55,8 +59,7 @@ const Application = function () {
 	});
 
 	let tagline = createElement(taglineDiv, "h1");
-	tagline.id = "tagline";
-	tagline.textContent = "The Framework For Staying In The Flow";
+	tagline.setTranslation("tagline", "en");
 	tagline.setStyle({
 		fontFamily: "'Archivo', sans-serif",
 		fontSize: "48px",
@@ -70,8 +73,8 @@ const Application = function () {
 	});
 
 	let miniTagline = createElement(taglineDiv, "p");
-	miniTagline.id = "miniTagline";
-	miniTagline.textContent = `A framework built for the best developer experience, for the best maintainability and predictability.`;
+	miniTagline.setTranslation("miniTagline", "en");
+
 	miniTagline.setStyle({
 		fontFamily: "'Archivo', sans-serif",
 		fontSize: "1.2rem",
@@ -85,21 +88,15 @@ const Application = function () {
 
 	let whyRoseBtn = outlinedButton(buttonContainer, "why roseView ?", "180px", "auto");
 
-	whyRoseBtn.onLongTouch = function () {
-		alert("OnLong Touched");
-	};
+	let roseBlog = outlinedButton(buttonContainer, "Translate Page", "180px", "auto");
 
-	let roseBlog = outlinedButton(buttonContainer, "roseView Blog", "180px", "auto");
-
-	roseBlog.onLongTouch = function () {
-		buttonContainer.removeChild(whyRoseBtn);
+	roseBlog.onTouch = function () {
+		switchLang("tn");
 	};
 
 	roseConfig.Title = "roseview Framework";
 
-	const router = [{ path: "/" }, { path: "/blog" }];
-
-	createApplication(layout, router);
+	createApplication(layout);
 };
 
 Application();
