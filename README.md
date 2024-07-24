@@ -14,11 +14,11 @@ Moreover we will ditch any warnings about separation of concerns, everything wil
 
 ## Getting Started
 
-roseview.js prioritizes ESM only.
-
 To get started run this command :
 
-> npx create-roseview-app
+> npx create-roseview-app your-app-name
+
+A folder containing important stuff will be created,
 
 Your main.js file  will look something like this :
 
@@ -69,7 +69,7 @@ createLayout function has these parameters :
 createLayout(type, options)
 ```
 
-There are 5 types of layouts ( linear, absolute, card, frame, table )
+There are 2 types of layouts ( linear, frame )
 
 A linear layout aligns its children normally, while an absolute one relies on the setPosition method.
 These are the ones you will use mostly.
@@ -115,7 +115,12 @@ export function OnStart() {
 
   /* We can also do this btw */
   navbar.style.marginTop = '15px'
+  
+  /* But its not recommended so try using batchDOMUpdates */
 
+  navbar.batchDOMUpdates(() => {
+  navbar.style.backgroundColor = "green";
+ });
   /**
    * However its not recommended for styling like using
    * the marginTop example

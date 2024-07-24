@@ -170,43 +170,8 @@ const roseComponent = class {
 
 	async setTranslation(id, lang) {
 		this.element.setAttribute("data-translate-id", id);
-		if (languageFilePromise) {
-			await languageFilePromise;
-			this.element.textContent = window.languageFile.translations[id][lang];
-		} else {
-			languageFilePromise = fetch("./lang.json")
-				.then((response) => {
-					if (!response.ok) {
-						throw new Error("Cannot Load Translation Utility: " + response.status);
-					}
-					return response.json();
-				})
-				.then((json) => {
-					window.languageFile = json;
-					this.element.textContent = json.translations[id][lang];
-				})
-				.catch((error) => {
-					console.error("Error fetching the language file:", error);
-					throw error;
-				});
-
-			return languageFilePromise;
-		}
-	}
-};
-
-export const switchLang = async (lang) => {
-	currentLang = lang;
-	const elements = document.querySelectorAll("[data-translate-id]");
-	for (let element of elements) {
-		const id = element.getAttribute("data-translate-id");
-		$T(id, lang)
-			.then((translation) => {
-				element.textContent = translation;
-			})
-			.catch((error) => {
-				element.textContent = "Error loading translation";
-			});
+		const translation = await $T(id, lang);
+		this.element.textContent = translation;
 	}
 };
 
@@ -382,10 +347,6 @@ const handleRouteChange = (event) => {
 	//window.history.pushState({}, null, window.location.origin + "/" + nextPage);
 };
 const roseConfig = {
-	/**
-	 * Page route
-	 * @param {string} path
-	 */
 	OpenPage(path) {
 		const script = document.createElement("script");
 		script.src = `./routes/${path}.js`;
@@ -395,6 +356,21 @@ const roseConfig = {
 		$Q("body").appendChild(script);
 		window.pathHistory.push(path);
 		window.history.pushState({}, null, window.location.origin + "/" + path);
+	},
+
+	async switchLang(lang) {
+		currentLang = lang;
+		const elements = document.querySelectorAll("[data-translate-id]");
+		for (let element of elements) {
+			const id = element.getAttribute("data-translate-id");
+			$T(id, lang)
+				.then((translation) => {
+					element.textContent = translation;
+				})
+				.catch((error) => {
+					element.textContent = "Error loading translation";
+				});
+		}
 	},
 
 	get Landscape() {
@@ -407,16 +383,10 @@ const roseConfig = {
 		return "portrait";
 	},
 
-	/**
-	 * @param {string} title
-	 */
 	set Title(title) {
 		document.title = title;
 	},
 
-	/**
-	 * @param {string} path
-	 */
 	set Icon(path) {
 		const link = document.querySelector("link[rel*='icon']") || document.createElement("link");
 		link.type = "image/x-icon";

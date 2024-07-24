@@ -1,2 +1,25 @@
-- router
-- createSuspense
+
+0.0.7 Release Notes
+
+Added the following roseConfig Methods :
+- roseConfig.Icon
+- roseConfig.OpenPage
+- roseConfig.switchLang
+
+Added the following methods of createElement :
+- onContextMenu
+- onTouch
+- onLongTouch
+- batchDOMUpdates
+- setTranslation
+- Fixed (hide/gone/show)
+
+Added the following methods of createLayout :
+- setChildMargins
+- setMargins
+
+Updated create-roseview-app to 0.0.7
+
+0.0.6
+
+Added create-roseview-app
