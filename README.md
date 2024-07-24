@@ -25,11 +25,11 @@ Your main.js file  will look something like this :
 ```javascript
 import { createLayout, createApplication } from "./roseviewsdk/roseview.core.js";
 
-export function OnStart() {
- let layout = createLayout("linear", "top,vertical");
 
- createApplication(layout);
-}
+let layout = createLayout("linear", "top,vertical");
+
+createApplication(layout);
+
 ```
 
 ### Explaining everything >3
@@ -108,18 +108,18 @@ createElement returns a proxy, a proxy allows us to emulate the roseComponent ob
 ```javascript
 import { createLayout, createElement, createApplication, roseConfig } from "./roseviewsdk/roseview.core.js";
 
-export function OnStart() {
- let layout = createLayout("linear", "top,vertical");
 
- let navbar = createElement(layout, "nav", "vcenter, left");
+let layout = createLayout("linear", "top,vertical");
 
-  /* We can also do this btw */
-  navbar.style.marginTop = '15px'
+let navbar = createElement(layout, "nav", "vcenter, left");
+
+/* We can also do this btw */
+navbar.style.marginTop = '15px'
   
-  /* But its not recommended so try using batchDOMUpdates */
+/* But its not recommended so try using batchDOMUpdates */
 
-  navbar.batchDOMUpdates(() => {
-  navbar.style.backgroundColor = "green";
+navbar.batchDOMUpdates(() => {
+navbar.style.backgroundColor = "green";
  });
   /**
    * However its not recommended for styling like using
