@@ -79,17 +79,20 @@ const Application = function () {
 		color: "#213547"
 	});
 
-	let whyRoseBtn = outlinedButton(contentLay, "why roseView ?", "180px", "auto");
-	whyRoseBtn.setStyle({
-		marginTop: "25px"
-	});
+	let buttonContainer = createLayout("linear", "vcenter, vertical");
+	contentLay.addChild(buttonContainer);
+	buttonContainer.setChildMargins(null, "25px", null, "25px");
 
-	let roseBlog = outlinedButton(contentLay, "roseView Blog", "180px", "auto");
-	roseBlog.setStyle({
-		marginTop: "25px"
-	});
-	roseBlog.onclick = function () {
-		roseConfig.OpenPage("blog");
+	let whyRoseBtn = outlinedButton(buttonContainer, "why roseView ?", "180px", "auto");
+
+	whyRoseBtn.onLongTouch = function () {
+		alert("OnLong Touched");
+	};
+
+	let roseBlog = outlinedButton(buttonContainer, "roseView Blog", "180px", "auto");
+
+	roseBlog.onLongTouch = function () {
+		buttonContainer.removeChild(whyRoseBtn);
 	};
 
 	roseConfig.Title = "roseview Framework";

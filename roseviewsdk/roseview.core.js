@@ -1,5 +1,5 @@
 /**
- * roseView Engine is a framework that allows you
+ * roseView is a framework that allows you
  * to write ui declarativley.
  *
  *@author
@@ -41,6 +41,7 @@ const roseComponent = class {
 		this.mounted = false;
 		this.element = null;
 		this.elementUid = null;
+		this.eventListeners = [];
 		this.elementProps = {
 			IsVisible: true,
 			IsAlive: true
@@ -67,6 +68,11 @@ const roseComponent = class {
 	 */
 	removeChild(child) {
 		if (child instanceof roseComponent) {
+			child.eventListeners.forEach((el) => {
+				let [event, Fn] = el;
+				child.element.removeEventListener(event, Fn);
+			});
+
 			child.element.remove();
 			this.elementProps.IsAlive = false;
 		} else {
@@ -74,73 +80,63 @@ const roseComponent = class {
 		}
 	}
 
-	/**
-	 * Hide The Element
-	 */
-	hide() {
-		this.element.style = this.css`
-        visibility : hidden;`;
-		this.elementProps.IsVisible = false;
+	set onContextMenu(Fn) {
+		this.element.addEventListener("contextmenu", (event) => {
+			event.preventDefault();
+			Fn();
+		});
 	}
 
-	/**
-	 * Show The Element
-	 */
-	show() {
-		this.element.style = this.css`
-        visibility : visible;`;
-		this.elementProps.IsVisible = true;
+	set onTouch(Fn) {
+		this.element.addEventListener("click", Fn);
+		this.eventListeners.push(["click", Fn]);
 	}
 
-	/**
-	 * Set the visibility of this element
-	 * so it takes no space in the layout
-	 * and is hidden from view
-	 */
-	gone() {
-		this.element.style = this.css`
-        display : none;`;
-		this.elementProps.IsVisible = false;
+	set onLongTouch(Fn) {
+		let touchTimeout;
+		this.element.addEventListener("touchstart", (event) => {
+			if (event.touches.length === 1) {
+				touchTimeout = setTimeout(() => Fn(event), 600);
+			}
+		});
+
+		this.element.addEventListener("touchend", () => {
+			clearTimeout(touchTimeout);
+		});
+
+		this.eventListeners.push(["touchstart", Fn]);
+		this.eventListeners.push(["touchend", Fn]);
 	}
 
-	/**
-	 * @returns boolean
-	 */
-	isVisible() {
-		return Boolean(this.elementProps.IsVisible);
+	batchDOMUpdates(Fn) {
+		requestAnimationFrame(Fn);
 	}
 
-	/**
-	 * @returns boolean
-	 */
-	isAlive() {
-		return Boolean(this.elementProps.IsAlive);
-	}
-
-	/**
-	 * Add The InnerHTML Of That Element
-	 * @param {htmlString} strings
-	 */
-	setHtml(strings, ...values) {
-		let htmlString = strings.reduce((result, str, i) => {
-			return result + str + (values[i] || "");
-		}, "");
-		this.element.innerHtml = htmlString;
-	}
-
-	/**
-	 * Add Css Rules To That Element
-	 * @param {object} styles
-	 */
 	setStyle(styles) {
 		const className = cssObjectParser(styles);
 		this.element.classList.add(className);
 	}
 
-	/** ====================== COMPONENT LIFECYCLE METHODS ======================  */
-	onMount(Fn) {}
+	hide() {
+		this.setStyle({
+			visibility: "hidden"
+		});
+		this.elementProps.IsVisible = false;
+	}
 
-	onDismount(Fn) {}
+	show() {
+		this.setStyle({
+			visibility: "visible"
+		});
+		this.elementProps.IsVisible = true;
+	}
+
+	gone() {
+		this.setStyle({
+			display: "none"
+		});
+		this.elementProps.IsVisible = false;
+	}
 };
 
 const generateClassName = (() => {
@@ -198,8 +194,6 @@ const cssObjectParser = (styles) => {
 	return className;
 };
 
-/* ==================================== roseView Engine Exports  ==================================== */
-
 const createLayout = (type, options) => {
 	return new rsvLAYOUT(type, options);
 };
@@ -211,6 +205,26 @@ const rsvLAYOUT = class extends roseComponent {
 		this.element = document.createElement("div");
 
 		type ? layoutFitApi(this.element, type, options) : null;
+	}
+
+	setChildMargins(left, top, right, bottom) {
+		this.setStyle({
+			" *": {
+				marginLeft: left,
+				marginTop: top,
+				marginRight: right,
+				marginBottom: bottom
+			}
+		});
+	}
+
+	setMargins(left, top, right, bottom) {
+		this.setStyle({
+			marginLeft: left,
+			marginRight: right,
+			marginTop: top,
+			marginBottom: bottom
+		});
 	}
 };
 
@@ -259,7 +273,9 @@ const createApplication = (mainLayout, routes) => {
 			width: "100%",
 			height: "100%"
 		});
-		document.body.appendChild(mainLayout.element);
+		let fragment = document.createDocumentFragment();
+		fragment.appendChild(mainLayout.element);
+		document.body.appendChild(fragment);
 	});
 
 	window.routes = routes;
@@ -279,14 +295,8 @@ const handleRouteChange = (event) => {
 	const lastPath = window.pathHistory[window.pathHistory.length - 1];
 	const nextPage = event.state ? event.state.path : window.location.pathname;
 	const nextPath = nextPage ? nextPage : window.pathHistory[window.pathHistory.length - 1];
-	
-	if (nextPage === "/") {
-		const script = document.createElement("script");
-		script.src = `./main.js`;
-		script.type = "module";
 
-		document.body.replaceChildren();
-		$Q("body").appendChild(script);
+	if (nextPage === "/") {
 		console.log("last Path", lastPath);
 		console.log("next Path", nextPath);
 		console.log("next Page", nextPage);
@@ -309,7 +319,6 @@ const roseConfig = {
 		const script = document.createElement("script");
 		script.src = `./routes/${path}.js`;
 		script.type = "module";
-		script.setAttribute("data-dynamic-script", "true");
 
 		document.body.replaceChildren();
 		$Q("body").appendChild(script);
@@ -433,6 +442,8 @@ function layoutFitApi(layout, type, options) {
 			display: "flex"
 		});
 		layout.classList.add(className);
+	} else if (layoutTYPE == "frame") {
+		//TODO
 	} else console.error("Unknown Layout ", layout);
 }
 
