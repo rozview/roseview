@@ -1,4 +1,4 @@
-import { createElement } from "../roseviewsdk/roseview.core.js";
+import { createElement } from "../roseview/roseview.core.js";
 
 const outlinedButton = function (parent, text, width, height) {
 	let btn = createElement(parent, "button", null, width, height);

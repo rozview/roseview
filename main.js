@@ -1,5 +1,6 @@
-import { roseConfig, createLayout, createElement, createApplication } from "./roseviewsdk/roseview.core.js";
+import { roseConfig, createLayout, createElement, createApplication, $El } from "./roseview/roseview.core.js";
 
+import PinchZoom from "https://unpkg.com/pinch-zoom-js@2.3.5/dist/pinch-zoom.min.js";
 import outlinedButton from "./components/outlinedbtn.js";
 
 let layout = createLayout("linear", "top,vertical");
@@ -81,6 +82,7 @@ contentLay.addChild(buttonContainer);
 buttonContainer.setChildMargins(null, "25px", null, "25px");
 
 let whyRoseBtn = outlinedButton(buttonContainer, "why roseView ?", "180px", "auto");
+whyRoseBtn.id = "whyRoseBtn";
 
 let roseBlog = outlinedButton(buttonContainer, "Translate Page", "180px", "auto");
 
@@ -88,6 +90,14 @@ roseBlog.onTouch = function () {
 	roseConfig.switchLang("tn");
 };
 
+setTimeout(() => {
+	var myElement = document.getElementById("whyRoseBtn");
+	var pz = new PinchZoom(myElement, {
+		draggableUnzoomed: false,
+		minZoom: 1
+	});
+	pz.enable();
+});
 roseConfig.Title = "roseview Framework";
 
 createApplication(layout);

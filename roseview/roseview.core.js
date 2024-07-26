@@ -1,9 +1,5 @@
 /**
- * roseView is a framework that allows you
- * to write ui declarativley.
- *
- *@author
- * Oarabile Koore
+ * roseview is a the framework that allows you to write ui functionaly, logically and in a simple manner.
  *
  * @license
  * MIT
@@ -46,16 +42,6 @@ const $T = async (id, lang) => {
 };
 
 const $El = (a) => document.getElementById(a);
-
-let animatelib = document.createElement("link");
-animatelib.href = "./animate.min.css";
-animatelib.rel = "text/stylesheet";
-
-let tweenlib = document.createElement("script");
-tweenlib.type = "script";
-tweenlib.src = "./tween.min.js";
-$Q("head").appendChild(animatelib);
-$Q("head").appendChild(tweenlib);
 
 const lockOrientation = async (orient) => {
 	try {
@@ -346,6 +332,7 @@ const handleRouteChange = (event) => {
 
 	//window.history.pushState({}, null, window.location.origin + "/" + nextPage);
 };
+
 const roseConfig = {
 	OpenPage(path) {
 		const script = document.createElement("script");
@@ -358,7 +345,7 @@ const roseConfig = {
 		window.history.pushState({}, null, window.location.origin + "/" + path);
 	},
 
-	async switchLang(lang) {
+	async SwitchLang(lang) {
 		currentLang = lang;
 		const elements = document.querySelectorAll("[data-translate-id]");
 		for (let element of elements) {
