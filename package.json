@@ -1,8 +1,8 @@
 {
 	"name": "roseview",
-	"version": "0.0.7",
+	"version": "0.1.2",
 	"description": "The Framework For Staying In The Flow",
-	"main": "./roseviewsdk/roseview.core.js",
+	"main": "./index.js",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/oarabiledev/roseview.git"
@@ -16,5 +16,13 @@
 	"bugs": {
 		"url": "https://github.com/oarabiledev/roseview/issues"
 	},
-	"homepage": "https://github.com/oarabiledev/roseview#readme"
+	"homepage": "https://github.com/oarabiledev/roseview#readme",
+	"dependencies": {
+		"vite": "^5.3.5"
+	},
+	"scripts": {
+		"dev": "vite",
+		"build": "vite build",
+		"preview": "vite preview"
+	}
 }

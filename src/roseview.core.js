@@ -5,10 +5,8 @@
  * MIT
  */
 
-const DW = window.innerWidth + "px";
-const DH = window.innerHeight + "px";
-
-const $Q = (a) => document.querySelector(a);
+const DW = window.innerWidth;
+const DH = window.innerHeight;
 
 let languageFilePromise = null;
 let currentLang = null;
@@ -40,8 +38,6 @@ const $T = async (id, lang) => {
 		return languageFilePromise;
 	}
 };
-
-const $El = (a) => document.getElementById(a);
 
 const lockOrientation = async (orient) => {
 	try {
@@ -128,27 +124,27 @@ const roseComponent = class {
 		requestAnimationFrame(Fn);
 	}
 
-	setStyle(styles) {
+	style(styles) {
 		const className = cssObjectParser(styles);
 		this.element.classList.add(className);
 	}
 
 	hide() {
-		this.setStyle({
+		this.style({
 			visibility: "hidden"
 		});
 		this.elementProps.IsVisible = false;
 	}
 
 	show() {
-		this.setStyle({
+		this.style({
 			visibility: "visible"
 		});
 		this.elementProps.IsVisible = true;
 	}
 
 	gone() {
-		this.setStyle({
+		this.style({
 			display: "none"
 		});
 		this.elementProps.IsVisible = false;
@@ -160,7 +156,6 @@ const roseComponent = class {
 		this.element.textContent = translation;
 	}
 };
-
 const generateClassName = (() => {
 	let counter = 0;
 	return () => `rsv-class-${counter++}`;
@@ -168,7 +163,7 @@ const generateClassName = (() => {
 
 const cssObjectParser = (styles) => {
 	const className = generateClassName();
-	const styleSheet = document.styleSheets[0] || document.head.appendChild(document.createElement("style")).sheet;
+	const styleSheet = document.styleSheets[0] || document.head.appendChild(document.rsvElement("style")).sheet;
 
 	let cssString = "";
 	let nestedCssRules = [];
@@ -180,9 +175,13 @@ const cssObjectParser = (styles) => {
 			if (typeof value === "object") {
 				if (key.startsWith("@")) {
 					mediaQueryRules.push({ media: key, selector, styles: value });
+				} else if (key.startsWith("&:")) {
+					// Handle pseudo-classes prefixed with "&:"
+					const pseudoClass = key.replace("&", selector);
+					nestedCssRules.push({ selector: pseudoClass, styles: value });
 				} else {
-					/* For  pseudo-classes and nested selectors  */
-					nestedCssRules.push({ selector: `${selector}${key}`, styles: value });
+					// Handle other nested selectors
+					nestedCssRules.push({ selector: `${selector} ${key}`, styles: value });
 				}
 			} else {
 				baseStyles += `${key.replace(/([A-Z])/g, "-$1").toLowerCase()}: ${value}; `;
@@ -216,11 +215,11 @@ const cssObjectParser = (styles) => {
 	return className;
 };
 
-const createLayout = (type, options) => {
-	return new rsvLAYOUT(type, options);
+const rsvContainer = (type, options) => {
+	return new Container(type, options);
 };
 
-const rsvLAYOUT = class extends roseComponent {
+const Container = class extends roseComponent {
 	constructor(type = "linear", options = "center") {
 		super();
 
@@ -230,7 +229,7 @@ const rsvLAYOUT = class extends roseComponent {
 	}
 
 	setChildMargins(left, top, right, bottom) {
-		this.setStyle({
+		this.style({
 			" *": {
 				marginLeft: left,
 				marginTop: top,
@@ -241,7 +240,7 @@ const rsvLAYOUT = class extends roseComponent {
 	}
 
 	setMargins(left, top, right, bottom) {
-		this.setStyle({
+		this.style({
 			marginLeft: left,
 			marginRight: right,
 			marginTop: top,
@@ -250,22 +249,29 @@ const rsvLAYOUT = class extends roseComponent {
 	}
 };
 
-const createElement = (parent, elment, options, width, height) => {
-	return new rsvElement(parent, elment, options, width, height);
+const rsvElement = (parent, element, props) => {
+	return new htmlElement(parent, element, props);
 };
 
-const rsvElement = class extends roseComponent {
-	constructor(parent, element, options, width, height) {
+const htmlElement = class extends roseComponent {
+	constructor(parent, element, props = {}) {
 		super();
 
 		this.element = document.createElement(element);
 
 		parent ? parent.addChild(this) : null;
 		this.mounted = true;
-		options ? optionsApi(this.element, options) : null;
 
-		width ? (this.element.style.width = width) : null;
-		height ? (this.element.style.height = height) : null;
+		if (props.style) {
+			const className = cssObjectParser(props.style);
+			this.element.classList.add(className);
+		}
+
+		props.text ? (this.element.textContent = props.text) : null;
+		props.options ? optionsApi(this.element, props.options) : null;
+
+		props.width ? (this.element.style.width = props.width) : null;
+		props.height ? (this.element.style.height = props.height) : null;
 
 		return new Proxy(this, {
 			get(target, prop) {
@@ -288,25 +294,8 @@ const rsvElement = class extends roseComponent {
 	}
 };
 
-const createApplication = (mainLayout, routes) => {
-	window.pathHistory = [];
-	document.addEventListener("DOMContentLoaded", () => {
-		mainLayout.setStyle({
-			width: "100%",
-			height: "100%"
-		});
-		let fragment = document.createDocumentFragment();
-		fragment.appendChild(mainLayout.element);
-		document.body.appendChild(fragment);
-	});
-
-	window.routes = routes;
-	window.pathHistory.push("/");
-	window.addEventListener("popstate", (event) => handleRouteChange(event));
-};
-
 const createPage = (pageLayout, currentPage) => {
-	pageLayout.setStyle({
+	pageLayout.style({
 		width: "100%",
 		height: "100%"
 	});
@@ -329,13 +318,28 @@ const handleRouteChange = (event) => {
 	}
 
 	window.pathHistory.pop();
-
-	//window.history.pushState({}, null, window.location.origin + "/" + nextPage);
 };
 
-const roseConfig = {
+const rsvConfig = {
+	Application(mainLayout, routes) {
+		window.pathHistory = [];
+		document.addEventListener("DOMContentLoaded", () => {
+			mainLayout.style({
+				width: "100%",
+				height: "100%"
+			});
+			let fragment = document.createDocumentFragment();
+			fragment.appendChild(mainLayout.element);
+			document.body.appendChild(fragment);
+		});
+
+		window.routes = routes;
+		window.pathHistory.push("/");
+		window.addEventListener("popstate", (event) => handleRouteChange(event));
+	},
+
 	OpenPage(path) {
-		const script = document.createElement("script");
+		const script = document.rsvElement("script");
 		script.src = `./routes/${path}.js`;
 		script.type = "module";
 
@@ -370,12 +374,18 @@ const roseConfig = {
 		return "portrait";
 	},
 
+	/**
+	 * @param {string} title
+	 */
 	set Title(title) {
 		document.title = title;
 	},
 
+	/**
+	 * @param {any} path
+	 */
 	set Icon(path) {
-		const link = document.querySelector("link[rel*='icon']") || document.createElement("link");
+		const link = document.querySelector("link[rel*='icon']") || document.rsvElement("link");
 		link.type = "image/x-icon";
 		link.rel = "shortcut icon";
 		link.href = path;
@@ -475,4 +485,4 @@ function layoutFitApi(layout, type, options) {
 	} else console.error("Unknown Layout ", layout);
 }
 
-export { DW, DH, $Q, $El, roseConfig, createLayout, createElement, createPage, createApplication };
+export { rsvConfig, rsvContainer, rsvElement };
