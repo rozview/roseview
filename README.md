@@ -35,6 +35,10 @@ htmlPage.Title = "roseview Framework";
 
 ```
 
+We use vite, so to test out your project run :
+
+> npm run dev
+
 ### Explaining everything >3
 
 The `roseview.core.js` file exports the following :
