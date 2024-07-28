@@ -1,4 +1,4 @@
-![roseView Logo](src/roseviewBannerLogo.png)
+![roseView Logo](src/roseview.png)
 
 [![license](https://img.shields.io/npm/l/svelte.svg)](LICENSE.md)
 

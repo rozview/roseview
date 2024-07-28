@@ -1,6 +1,13 @@
 # Ignore node_modules directory
 node_modules/
 
+# ignore prettier
+.prettierignore
+
+# ignore index.html and main.js
+main.js
+index.html
+
 # Logs
 logs
 *.log

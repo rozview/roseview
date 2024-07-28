@@ -1,11 +1,9 @@
 import { htmlPage, htmlContainer, htmlElement } from "roseview";
-import { createSignal, showIf } from "roseview";
-
-let v = true;
+import { createSignal } from "roseview";
 
 let [getTheme, setTheme] = createSignal("light", (val) => {
 	button.batchDOMUpdates({
-		textContent: `The new theme is : ${getTheme()}`
+		textContent: `${val}`
 	});
 });
 
@@ -19,13 +17,6 @@ let button = htmlElement(layout, "button", null, {
 button.onTouch = () => {
 	setTheme("dark");
 };
-
-let buttonB = htmlElement(layout, "button", null, {
-	sumStupid: "hi",
-	textContent: "Damn Some Is False"
-});
-
-showIf(v, button, buttonB);
 
 button.style({
 	width: "180px",
@@ -55,7 +46,6 @@ button.style({
 	}
 });
 
-console.log();
 htmlPage.App(layout);
 
 htmlPage.Title = "roseview Framework";

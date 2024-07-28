@@ -3,10 +3,10 @@
  *
  * @license
  * MIT
+ *
+ * @version
+ * 0.1.5
  */
-
-const DW = window.innerWidth;
-const DH = window.innerHeight;
 
 let languageFilePromise = null;
 let currentLang = null;
