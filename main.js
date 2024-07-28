@@ -1,18 +1,35 @@
-import { rsvConfig, rsvContainer, rsvElement } from "roseview";
+import { htmlPage, htmlContainer, htmlElement } from "roseview";
+import { createSignal, showIf } from "roseview";
 
-let layout = rsvContainer("linear", "center");
+let v = true;
 
-let button = rsvElement(layout, "button", {
-	width: "180px",
-	height: "auto",
-	text: "Hello World 👋"
+let [getTheme, setTheme] = createSignal("light", (val) => {
+	button.batchDOMUpdates({
+		textContent: `The new theme is : ${getTheme()}`
+	});
 });
 
-button.onTouch = function () {
-	alert(`Welcome To roseView :)`);
+let layout = htmlContainer("linear", "center");
+
+let button = htmlElement(layout, "button", null, {
+	sumStupid: "hi",
+	textContent: getTheme()
+});
+
+button.onTouch = () => {
+	setTheme("dark");
 };
 
+let buttonB = htmlElement(layout, "button", null, {
+	sumStupid: "hi",
+	textContent: "Damn Some Is False"
+});
+
+showIf(v, button, buttonB);
+
 button.style({
+	width: "180px",
+	height: "auto",
 	backgroundColor: "coral",
 	color: "white",
 	border: "none",
@@ -38,6 +55,7 @@ button.style({
 	}
 });
 
-rsvConfig.Application(layout);
+console.log();
+htmlPage.App(layout);
 
-rsvConfig.Title = "roseview Framework";
+htmlPage.Title = "roseview Framework";

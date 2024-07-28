@@ -120,8 +120,12 @@ const roseComponent = class {
 		this.eventListeners.push(["touchend", Fn]);
 	}
 
-	batchDOMUpdates(Fn) {
-		requestAnimationFrame(Fn);
+	batchDOMUpdates(updatesAsObject) {
+		Object.entries(updatesAsObject).forEach(([key, value]) => {
+			requestAnimationFrame(() => {
+				this.element[key] = value;
+			});
+		});
 	}
 
 	style(styles) {
@@ -163,7 +167,7 @@ const generateClassName = (() => {
 
 const cssObjectParser = (styles) => {
 	const className = generateClassName();
-	const styleSheet = document.styleSheets[0] || document.head.appendChild(document.rsvElement("style")).sheet;
+	const styleSheet = document.styleSheets[0] || document.head.appendChild(document.htmlElement("style")).sheet;
 
 	let cssString = "";
 	let nestedCssRules = [];
@@ -215,7 +219,7 @@ const cssObjectParser = (styles) => {
 	return className;
 };
 
-const rsvContainer = (type, options) => {
+const htmlContainer = (type, options) => {
 	return new Container(type, options);
 };
 
@@ -249,29 +253,25 @@ const Container = class extends roseComponent {
 	}
 };
 
-const rsvElement = (parent, element, props) => {
-	return new htmlElement(parent, element, props);
+const htmlElement = (parent, element, options, props) => {
+	return new roseElement(parent, element, options, props);
 };
 
-const htmlElement = class extends roseComponent {
-	constructor(parent, element, props = {}) {
+const roseElement = class extends roseComponent {
+	constructor(parent, element, options, props = {}) {
 		super();
 
 		this.element = document.createElement(element);
 
 		parent ? parent.addChild(this) : null;
 		this.mounted = true;
+		options ? optionsApi(this.element, options) : null;
 
-		if (props.style) {
-			const className = cssObjectParser(props.style);
-			this.element.classList.add(className);
-		}
-
-		props.text ? (this.element.textContent = props.text) : null;
-		props.options ? optionsApi(this.element, props.options) : null;
-
-		props.width ? (this.element.style.width = props.width) : null;
-		props.height ? (this.element.style.height = props.height) : null;
+		Object.entries(props).forEach(([key, value]) => {
+			requestAnimationFrame(() => {
+				this.element[key] = value;
+			});
+		});
 
 		return new Proxy(this, {
 			get(target, prop) {
@@ -294,14 +294,6 @@ const htmlElement = class extends roseComponent {
 	}
 };
 
-const createPage = (pageLayout, currentPage) => {
-	pageLayout.style({
-		width: "100%",
-		height: "100%"
-	});
-	document.body.appendChild(pageLayout.element);
-};
-
 const handleRouteChange = (event) => {
 	const lastPath = window.pathHistory[window.pathHistory.length - 1];
 	const nextPage = event.state ? event.state.path : window.location.pathname;
@@ -320,8 +312,8 @@ const handleRouteChange = (event) => {
 	window.pathHistory.pop();
 };
 
-const rsvConfig = {
-	Application(mainLayout, routes) {
+const htmlPage = {
+	App(mainLayout, routes) {
 		window.pathHistory = [];
 		document.addEventListener("DOMContentLoaded", () => {
 			mainLayout.style({
@@ -339,7 +331,7 @@ const rsvConfig = {
 	},
 
 	OpenPage(path) {
-		const script = document.rsvElement("script");
+		const script = document.htmlElement("script");
 		script.src = `./routes/${path}.js`;
 		script.type = "module";
 
@@ -385,7 +377,7 @@ const rsvConfig = {
 	 * @param {any} path
 	 */
 	set Icon(path) {
-		const link = document.querySelector("link[rel*='icon']") || document.rsvElement("link");
+		const link = document.querySelector("link[rel*='icon']") || document.htmlElement("link");
 		link.type = "image/x-icon";
 		link.rel = "shortcut icon";
 		link.href = path;
@@ -485,4 +477,49 @@ function layoutFitApi(layout, type, options) {
 	} else console.error("Unknown Layout ", layout);
 }
 
-export { rsvConfig, rsvContainer, rsvElement };
+const createSignal = function (defaultValue = null, subscriberFunc) {
+	let internalValue = defaultValue;
+	let subscription = [];
+
+	if (!subscriberFunc) {
+		console.error(`You have not specified a subscriber function`);
+	} else {
+		if (typeof subscriberFunc === "function") {
+			subscription.push(subscriberFunc);
+		} else {
+			console.error(`The subscriber you have given is not a function`);
+		}
+	}
+
+	const notify = () => {
+		subscription.forEach((subscriber) => subscriber(internalValue));
+	};
+
+	const getValue = () => {
+		return internalValue;
+	};
+
+	const setValue = (setterValue) => {
+		internalValue = setterValue;
+		notify();
+	};
+
+	return [getValue, setValue];
+};
+
+const showIf = (restingVal, child, fallback) => {
+	if (typeof restingVal === "boolean") {
+		if (restingVal) {
+			child.show();
+			fallback.gone();
+		} else {
+			child.gone();
+			fallback.show();
+		}
+	} else {
+		console.error(`showIf bound to a typeof value not boolean`);
+	}
+};
+
+export { htmlPage, htmlContainer, htmlElement };
+export { createSignal, showIf };

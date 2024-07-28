@@ -6,12 +6,6 @@
 
 A small framework that is all batteries included while maintaining ease of use and maintainability.
 
-roseview aims to provide the same amount of usefullness as other big dogs like React and Vue.
-
-The main aim is to do everything differently and still be fast, the first thing is we do not use a VDOM.
-
-Moreover we will ditch any warnings about separation of concerns, everything will be done from the javascript side.
-
 ## Getting Started
 
 To get started run this command :
@@ -25,19 +19,19 @@ A folder containing important stuff will be created,
 Your main.js file  will look something like this :
 
 ```javascript
-import { rsvConfig, rsvContainer, rsvElement } from "roseview";
+import { htmlPage, htmlContainer, htmlElement } from "roseview";
 
-let layout = rsvContainer("linear", "center");
+let layout = htmlContainer("linear", "center");
 
-let button = rsvElement(layout, "button", {
+let button = htmlElement(layout, "button", {
  width: "180px",
  height: "auto",
- text: "Hello World 👋"
+ textContent: "Hello World 👋"
 });
 
-rsvConfig.Application(layout);
+htmlPage.App(layout);
 
-rsvConfig.Title = "roseview Framework";
+htmlPage.Title = "roseview Framework";
 
 ```
 
@@ -46,31 +40,59 @@ rsvConfig.Title = "roseview Framework";
 The `roseview.core.js` file exports the following :
 
 ```javascript
-rsvConfig
-rsvElement
-rsvContainer 
+htmlPage
+htmlElement
+htmlContainer 
 ```
 
-#### rsvConfig
+#### htmlPage
 
 Allows you to set that pages configuration :
 
 ```javascript
-roseConfig.Icon
-roseConfig.Title 
-roseConfig.Portrait
-roseConfig.Landscape
-rsvConfig.Application(mainContainer)
+htmlPage.Icon
+htmlPage.Title 
+htmlPage.Portrait
+htmlPage.Landscape
+htmlPage.App(mainContainer)
 ```
 
-#### rsvContainer
+#### htmlElement
 
-A container is a special div, instead of creating a div its advised you prefer to use rsvContainer.
+htmlElement allows you to add any html element, into your container.
 
-rsvContainer function has these parameters :
+It has the following params :
 
 ```javascript
-rsvContainer(type, options)
+htmlElement(parent, element, props)
+```
+
+The parent is the container your element must attach to
+
+The element is an HtmlElement i.e : nav, button, img
+
+The props parameter takes in an object, you can set properties like width, height, text and style.
+
+In this manner :
+
+```javascript
+let button = htmlElement(layout, "button", {
+ width: "180px",
+ height: "auto",
+ text: "Hello World 👋"
+});
+```
+
+htmlElement returns a proxy, a proxy allows us to emulate the roseComponent object and access default setters and getters in javascript, this means you can do this (just as using document.createElement)
+
+#### htmlContainer
+
+A container is a special div, instead of creating a div its advised you prefer to use htmlContainer.
+
+htmlContainer function has these parameters :
+
+```javascript
+htmlContainer(type, options)
 ```
 
 There are 2 types of containers ( linear, frame )
@@ -88,37 +110,9 @@ hcenter,
 horizontal, vertical
 ```
 
-#### rsvElement
+### Styling Solution
 
-rsvElement allows you to add any html element, into your container.
-
-It has the following params :
-
-```javascript
-rsvElement(parent, element, props)
-```
-
-The parent is the container your element must attach to
-
-The element is an HtmlElement i.e : nav, button, img
-
-The props parameter takes in an object, you can set properties like width, height, text and style.
-
-In this manner :
-
-```javascript
-let button = rsvElement(layout, "button", {
- width: "180px",
- height: "auto",
- text: "Hello World 👋"
-});
-```
-
-rsvElement returns a proxy, a proxy allows us to emulate the roseComponent object and access default setters and getters in javascript, this means you can do this (just as using document.createElement)
-
-### Our Styling Solution
-
-The `style` method of rsvElement allows you to add styles that are scoped to that element
+The `style` method of htmlElement allows you to add styles that are scoped to that element
 
 It uses insertRule, in which the browser doesnt have to parse the css nor reflow making it optimal.
 
@@ -152,17 +146,77 @@ button.style({
 });
 ```
 
-## Custom Components
+### State Management
+
+We use signals for our state managment, here is how we implemented signals.
+
+First import the signal function :
+
+```javascript
+import { createSignal } from "roseview";
+```
+
+The function takes in params like this :
+
+```javascript
+let [getTheme, setTheme] = createSignal(defaultValue, subscriberFunction)
+```
+
+We use array destructuring partern and instead of using an alternative like createEffect to subscribe to the signal we take it in as a parameter.
+
+This can be used like :
+
+```javascript
+
+```javascript
+import { createSignal } from "roseview";
+
+let [getTheme, setTheme] = createSignal("light", (val) => {
+ button.batchDOMUpdates({
+  textContent: `The new theme is : ${getTheme()}`
+ });
+});
+```
+
+### More Atributes
+
+#### showIf
+
+This function allows us to show a component is its restingValue is true, here is the functions structure :
+
+```javascript
+showIf((restingValue, child, fallback))
+```
+
+In implementation it looks like this :
+
+```javascript
+let button = htmlElement(layout, "button", null, {
+ textContent: getTheme()
+});
+
+let buttonB = htmlElement(layout, "button", null, {
+ textContent: "Damn Some Is False"
+});
+
+let val = true;
+
+showIf(val, button, buttonB);
+
+// button component will be shown
+```
+
+### Custom Components
 
 These allow for better code, and we advise only to use functional components !
 
 Here is how to implement one :
 
 ```javascript
-import { rsvElement } from "roseview";
+import { htmlElement } from "roseview";
 
 const outlinedButton = function (parent, text, width, height) {
- let btn = rsvElement(parent, "button", props);
+ let btn = htmlElement(parent, "button", props);
 
   /* Do not use document.createElement, parent will fail to attach ! */
  
@@ -210,11 +264,8 @@ export default outlinedButton;
 
 There is alot to be added in roseview since we aim to make this an all batteries included framework we need to implement the following :
 
-- [ ] createImage
 - [ ] createSuspense
 - [ ] createRouter
-- [ ] createSignal & bindSignal method
-- [ ] createState & bindState method
 
 ## Contributing
 
