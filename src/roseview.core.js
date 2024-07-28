@@ -167,7 +167,7 @@ const generateClassName = (() => {
 
 const cssObjectParser = (styles) => {
 	const className = generateClassName();
-	const styleSheet = document.styleSheets[0] || document.head.appendChild(document.htmlElement("style")).sheet;
+	const styleSheet = document.styleSheets[0] || document.head.appendChild(document.createElement("style")).sheet;
 
 	let cssString = "";
 	let nestedCssRules = [];
