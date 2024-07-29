@@ -1,24 +1,10 @@
 import { htmlPage, htmlContainer, htmlElement } from "roseview";
 import { createSignal } from "roseview";
 
-let [getTheme, setTheme] = createSignal("light", (val) => {
-	button.batchDOMUpdates({
-		textContent: `${val}`
-	});
-});
+let layout = htmlContainer("linear", "vertical, center");
+layout.setChildMargins(null, "0.2rem");
 
-let layout = htmlContainer("linear", "center");
-
-let button = htmlElement(layout, "button", null, {
-	sumStupid: "hi",
-	textContent: getTheme()
-});
-
-button.onTouch = () => {
-	setTheme("dark");
-};
-
-button.style({
+let style = {
 	width: "180px",
 	height: "auto",
 	backgroundColor: "coral",
@@ -44,7 +30,22 @@ button.style({
 	"&:focus": {
 		boxShadow: "0 0 0 2px rgba(255, 87, 34, 0.3)"
 	}
-});
+};
+for (let i = 0; i < 10000; i++) {
+	if (i === 0) {
+		console.log("Adding A thousand Buttons Via insertAdjacentElement:)");
+		console.time("Button Creation Time");
+	}
+
+	if (i === 999) {
+		console.timeEnd("Button Creation Time");
+	}
+
+	let button = htmlElement(layout, "button", null, {
+		textContent: `Button No : ${i}`
+	});
+	button.style(style);
+}
 
 htmlPage.App(layout);
 

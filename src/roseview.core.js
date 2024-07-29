@@ -58,9 +58,6 @@ const roseComponent = class {
 			IsAlive: true
 		};
 	}
-
-	/* ============= roseComponent Global Methods ===============*/
-
 	/**
 	 * Add a child to that element
 	 * @param {InstanceType<roseComponent>} child
@@ -254,10 +251,10 @@ const Container = class extends roseComponent {
 };
 
 const htmlElement = (parent, element, options, props) => {
-	return new roseElement(parent, element, options, props);
+	return new Element(parent, element, options, props);
 };
 
-const roseElement = class extends roseComponent {
+const Element = class extends roseComponent {
 	constructor(parent, element, options, props = {}) {
 		super();
 
@@ -294,24 +291,6 @@ const roseElement = class extends roseComponent {
 	}
 };
 
-const handleRouteChange = (event) => {
-	const lastPath = window.pathHistory[window.pathHistory.length - 1];
-	const nextPage = event.state ? event.state.path : window.location.pathname;
-	const nextPath = nextPage ? nextPage : window.pathHistory[window.pathHistory.length - 1];
-
-	if (nextPage === "/") {
-		console.log("last Path", lastPath);
-		console.log("next Path", nextPath);
-		console.log("next Page", nextPage);
-	} else {
-		console.log("last Path", lastPath);
-		console.log("next Path", nextPath);
-		console.log("next Page", nextPage);
-	}
-
-	window.pathHistory.pop();
-};
-
 const htmlPage = {
 	App(mainLayout, routes) {
 		window.pathHistory = [];
@@ -324,10 +303,6 @@ const htmlPage = {
 			fragment.appendChild(mainLayout.element);
 			document.body.appendChild(fragment);
 		});
-
-		window.routes = routes;
-		window.pathHistory.push("/");
-		window.addEventListener("popstate", (event) => handleRouteChange(event));
 	},
 
 	OpenPage(path) {
@@ -336,9 +311,7 @@ const htmlPage = {
 		script.type = "module";
 
 		document.body.replaceChildren();
-		$Q("body").appendChild(script);
-		window.pathHistory.push(path);
-		window.history.pushState({}, null, window.location.origin + "/" + path);
+		document.body.appendChild(script);
 	},
 
 	async SwitchLang(lang) {
@@ -450,7 +423,7 @@ const optionsApi = (element, options) => {
 	};
 
 	options
-		.toLocaleLowerCase()
+		.toLowerCase()
 		.replace(/\s/g, "")
 		.split(",")
 		.forEach((el) => {
