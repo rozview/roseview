@@ -1,12 +1,12 @@
-/**
- * roseview is a the framework that allows you to write ui functionaly, logically and in a simple manner.
- *
- * @license
- * MIT
- *
- * @version
- * 0.1.5
- */
+// roseView Javascript Framework
+// @license
+// MIT
+
+// @version
+// 0.1.5
+
+// @author
+// Oarabile Koore
 
 let languageFilePromise = null;
 let currentLang = null;
@@ -47,7 +47,7 @@ const lockOrientation = async (orient) => {
 	}
 };
 
-const roseComponent = class {
+const htmlComponent = class {
 	constructor() {
 		this.mounted = false;
 		this.element = null;
@@ -60,22 +60,22 @@ const roseComponent = class {
 	}
 	/**
 	 * Add a child to that element
-	 * @param {InstanceType<roseComponent>} child
+	 * @param {InstanceType<htmlComponent>} child
 	 */
 	addChild(child) {
-		if (child instanceof roseComponent) {
+		if (child instanceof htmlComponent) {
 			this.element.appendChild(child.element);
 		} else {
-			console.error("Mounted Child Is Not A roseComponent");
+			console.error("Mounted Child Is Not A htmlComponent");
 		}
 	}
 
 	/**
 	 * Remove The Child
-	 * @param {Object<roseComponent>} child
+	 * @param {Object<htmlComponent>} child
 	 */
 	removeChild(child) {
-		if (child instanceof roseComponent) {
+		if (child instanceof htmlComponent) {
 			child.eventListeners.forEach((el) => {
 				let [event, Fn] = el;
 				child.element.removeEventListener(event, Fn);
@@ -84,7 +84,7 @@ const roseComponent = class {
 			child.element.remove();
 			this.elementProps.IsAlive = false;
 		} else {
-			console.error("Child Is Not A roseComponent");
+			console.error("Child Is Not A htmlComponent");
 		}
 	}
 
@@ -217,10 +217,10 @@ const cssObjectParser = (styles) => {
 };
 
 const htmlContainer = (type, options) => {
-	return new Container(type, options);
+	return new htmlDiv(type, options);
 };
 
-const Container = class extends roseComponent {
+const htmlDiv = class extends htmlComponent {
 	constructor(type = "linear", options = "center") {
 		super();
 
@@ -250,26 +250,25 @@ const Container = class extends roseComponent {
 	}
 };
 
-const htmlElement = (parent, element, options, props) => {
-	return new Element(parent, element, options, props);
+const htmlElement = (parent, element, props) => {
+	return new htmlTag(parent, element, props);
 };
 
-const Element = class extends roseComponent {
-	constructor(parent, element, options, props = {}) {
+const htmlTag = class extends htmlComponent {
+	constructor(parent, element, props = {}) {
 		super();
 
 		this.element = document.createElement(element);
 
 		parent ? parent.addChild(this) : null;
 		this.mounted = true;
-		options ? optionsApi(this.element, options) : null;
+		props.options ? optionsApi(this.element, props.options) : null;
 
 		Object.entries(props).forEach(([key, value]) => {
 			requestAnimationFrame(() => {
 				this.element[key] = value;
 			});
 		});
-
 		return new Proxy(this, {
 			get(target, prop) {
 				if (prop in target) {
@@ -292,15 +291,15 @@ const Element = class extends roseComponent {
 };
 
 const htmlPage = {
-	App(mainLayout, routes) {
+	Init(mainContiner, routes) {
 		window.pathHistory = [];
 		document.addEventListener("DOMContentLoaded", () => {
-			mainLayout.style({
+			mainContiner.style({
 				width: "100%",
-				height: "100%"
+				height: window.innerHeight + "px"
 			});
 			let fragment = document.createDocumentFragment();
-			fragment.appendChild(mainLayout.element);
+			fragment.appendChild(mainContiner.element);
 			document.body.appendChild(fragment);
 		});
 	},
@@ -358,10 +357,44 @@ const htmlPage = {
 	}
 };
 
-let viewOptions = ["top", "bottom", "left", "right", "horizontal", "vertical", "vcenter", "center"];
+let viewOptions = [
+	"noscrollbar",
+	"scrollxy",
+	"scrollx",
+	"scrolly",
+	"top",
+	"bottom",
+	"left",
+	"right",
+	"horizontal",
+	"vertical",
+	"vcenter",
+	"center"
+];
 
 const optionsApi = (element, options) => {
 	const functions = {
+		noscrollbar: () => {
+			element.classList.add("noscrollbar");
+		},
+		scrollxy: () => {
+			let className = cssObjectParser({
+				overflow: "auto"
+			});
+			element.classList.add(className);
+		},
+		scrollx: () => {
+			let className = cssObjectParser({
+				overflowX: "auto"
+			});
+			element.classList.add(className);
+		},
+		scrolly: () => {
+			let className = cssObjectParser({
+				overflowY: "auto"
+			});
+			element.classList.add(className);
+		},
 		left: () => {
 			let className = cssObjectParser({
 				display: "flex",
@@ -442,7 +475,9 @@ function layoutFitApi(layout, type, options) {
 
 	if (layoutTYPE == "linear") {
 		let className = cssObjectParser({
-			display: "flex"
+			display: "inline-flex",
+			position: "relative !important",
+			flexDirection: "column !important"
 		});
 		layout.classList.add(className);
 	} else if (layoutTYPE == "frame") {

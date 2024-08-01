@@ -29,7 +29,7 @@ let button = htmlElement(layout, "button", {
  textContent: "Hello World 👋"
 });
 
-htmlPage.App(layout);
+htmlPage.Init(layout);
 
 htmlPage.Title = "roseview Framework";
 
@@ -58,7 +58,7 @@ htmlPage.Icon
 htmlPage.Title 
 htmlPage.Portrait
 htmlPage.Landscape
-htmlPage.App(mainContainer)
+htmlPage.Init(mainContainer)
 ```
 
 #### htmlElement
@@ -107,6 +107,10 @@ The options parameter, allows you to specify the direction of your children, her
 
 ```console
 left, right
+scrollxy, 
+scrollx,
+scrolly,
+noscrollbar
 top, bottom
 center
 vcenter,
@@ -169,8 +173,6 @@ let [getTheme, setTheme] = createSignal(defaultValue, subscriberFunction)
 We use array destructuring partern and instead of using an alternative like createEffect to subscribe to the signal we take it in as a parameter.
 
 This can be used like :
-
-```javascript
 
 ```javascript
 import { createSignal } from "roseview";
@@ -277,14 +279,4 @@ Before you contribute i advise you read the code and follow that code style whil
 
 - If you find an issue you would like to fix, [open a pull request](#pull-requests).
 
-### Triaging issues and pull requests
-
-One great way you can contribute to the project without writing any code is to help triage issues and pull requests as they come in.
-
-- Ask for more information if you believe the issue does not provide all the details required to solve it.
-- Flag issues that are stale or that should be closed.
-- Ask for test plans and review code.
-
 Remember small pull requests are much easier to review and more likely to get merged.
-
-Only Oarabile Koore can write code and reproduce no tests !

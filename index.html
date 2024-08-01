@@ -2,12 +2,26 @@
 <html lang="en">
 	<head>
 		<style>
+			* {
+				-webkit-tap-highlight-color: transparent;
+				-webkit-touch-callout: none;
+				-webkit-user-select: none;
+				-khtml-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+				user-select: none;
+			}
+
 			html,
 			body {
 				margin: 0;
-				width: 100%;
-				height: auto;
+				width: 100vw;
+				height: 100vh;
 				overflow-x: hidden;
+			}
+			.noscrollbar::-webkit-scrollbar {
+				width: 0 !important;
+				height: 0 !important;
 			}
 		</style>
 		<meta charset="UTF-8" />
